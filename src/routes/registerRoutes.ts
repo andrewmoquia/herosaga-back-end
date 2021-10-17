@@ -14,7 +14,7 @@ router.post('/signup', parseForm,  csrfMainToken, (req, res)=> {
     if(!email || !username || !password || !confirmPassword) {
         res.send({message: 'All field required', csrfToken: req.csrfToken()})
     } else if (password != confirmPassword) {
-        res.send({message: 'Password don\' match.', csrfToken: req.csrfToken()})
+        res.send({message: 'Password don\'t match.', csrfToken: req.csrfToken()})
     } else {
         // res.send({message: 'All credentials are valid.', csrfToken: req.csrfToken()})
         User.findOne({$or: [{username: username}, {email: email}]}, (err: any, data: any) => {
@@ -28,7 +28,7 @@ router.post('/signup', parseForm,  csrfMainToken, (req, res)=> {
                     //Hash the password.
                     bcryptjs.hash(password, salt, (err, hash) => {
                         if(err) throw err
-                        const newUser = new User({
+                        new User({
                             username,
                             email,
                             password: hash,
