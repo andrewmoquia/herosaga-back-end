@@ -26,5 +26,20 @@ GET {{api}}/login
 POST {{api}}/login
 CSRF-Token: tzGe7wsF-JRv4VNdJAhqUIk33abEZ2E0dOso
 
+###
+GET {{api}}/signup
+
+
+###
+POST {{api}}/signup
+CSRF-Token: 8qWjkxxe-9gPleMnum0aWUGaRn2EgS7B8UIw
+Content-Type: application/json
+
+{
+    "username": "totoypogi",
+    "password": "totoypogi123",
+    "email": "totoypogi123@gmail.com",
+    "confirmPassword": "totoypogi123"
+}
 
 

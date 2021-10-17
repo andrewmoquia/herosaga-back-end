@@ -7,7 +7,8 @@ import rateLimit from 'express-rate-limit'
 import cookieParser from 'cookie-parser'
 import { config } from "./config"
 import csrfTestRoute from './csrfTokenTest'
-import { parseForm, csrfLoginToken } from './csrfToken' 
+import { parseForm, csrfLoginToken } from './csrfToken'
+import signupRoute from './routes/registerRoutes' 
 
 const app = express()
 
@@ -41,6 +42,7 @@ app.use(express.json())
 
 //Handle routes.
 app.use(csrfTestRoute)
+app.use(signupRoute)
 
 app.get('/', (req, res) => {
     res.send("Welcome to incu monsters back-end.")
