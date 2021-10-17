@@ -23,16 +23,12 @@ CSRF-Token: tzGe7wsF-JRv4VNdJAhqUIk33abEZ2E0dOso
 GET {{api}}/login
 
 ###
-POST {{api}}/login
-CSRF-Token: tzGe7wsF-JRv4VNdJAhqUIk33abEZ2E0dOso
-
-###
 GET {{api}}/signup
 
 
 ###
 POST {{api}}/signup
-CSRF-Token: 8qWjkxxe-9gPleMnum0aWUGaRn2EgS7B8UIw
+CSRF-Token: Cx0J5Yzx-st94Z08zkrkl5Y0NH-zqhZV3NCk
 Content-Type: application/json
 
 {
@@ -42,4 +38,21 @@ Content-Type: application/json
     "confirmPassword": "totoypogi123"
 }
 
+###
+POST {{api}}/login
+Content-Type: application/json
 
+{
+    "email": "totoypogi123@gmail.com",
+    "password": "totoypogi123"
+}
+
+###
+GET {{api}}/
+
+
+###
+GET {{api}}/user
+
+###
+GET {{api}}/logout

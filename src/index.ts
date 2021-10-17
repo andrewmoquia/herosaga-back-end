@@ -7,10 +7,18 @@ import rateLimit from 'express-rate-limit'
 import cookieParser from 'cookie-parser'
 import { config } from "./config"
 import csrfTestRoute from './csrfTokenTest'
-import { parseForm, csrfLoginToken } from './csrfToken'
 import signupRoute from './routes/registerRoutes' 
+import session from 'express-session'
+import passport from 'passport'
+import User from './user'
+import loginRoute from './routes/loginRoute'
+import createMemoryStore from 'memorystore'
+import { IMongoUser } from './interfaces'
 
 const app = express()
+
+const MemoryStore = createMemoryStore(session)
+
 
 //Add limit to all request base on this condition
 const limiter = rateLimit({
@@ -28,7 +36,21 @@ app.use(cors({
 }))
 
 // We need this because "cookie" is true in csrfProtection.
-app.use(cookieParser())
+app.use(cookieParser('random'))
+
+app.use(session({
+    secret: 'random', 
+    resave: true,
+    saveUninitialized: false,
+    store: new MemoryStore({
+        checkPeriod: 86400000 //Prune expired entries every 24h
+    }),
+    cookie: {
+        maxAge: 60* 100,
+        sameSite: 'strict',
+        secure: true,
+    }
+}))
 
 //Add 11 layer of security
 app.use(helmet())
@@ -40,20 +62,38 @@ app.use(limiter)
 app.use(morgan('dev'))
 app.use(express.json())
 
+//Start passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
+
+//Taking user data from authentication and store it in session cookie
+passport.serializeUser((user: IMongoUser, done) => {
+    return done(null, user._id)
+})
+
+//Take user data and attaching it to req.user
+passport.deserializeUser((id, done) => {
+    User.findById(id, (err: Error, user: IMongoUser) => {
+        const userData = {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            isVerified: user.isVerified,
+            googleId: user.googleId,
+            provider: user.provider,
+        }
+        if(err) throw err
+        return done(err, userData)
+    })
+})
+
 //Handle routes.
 app.use(csrfTestRoute)
 app.use(signupRoute)
+app.use(loginRoute)
 
 app.get('/', (req, res) => {
-    res.send("Welcome to incu monsters back-end.")
-})
-
-app.get('/login', csrfLoginToken, (req, res) => {
-    res.send(req.csrfToken())
-})
-
-app.post('/login', parseForm, csrfLoginToken, (req, res) => {
-    res.send("Welcome to incu monsters back-end.")
+    res.send("Welcome!")
 })
 
 //Live our server
