@@ -16,12 +16,10 @@ router.post('/signup', parseForm,  csrfSignupToken, (req, res)=> {
     } else if (password != confirmPassword) {
         res.send({message: 'Password don\'t match.', csrfToken: req.csrfToken()})
     } else {
-        // res.send({message: 'All credentials are valid.', csrfToken: req.csrfToken()})
         User.findOne({$or: [{username: username}, {email: email}]}, (err: any, data: any) => {
-            if(err) throw err
-            if(data) {
-                res.send({message: 'User exist already.', csrfToken: req.csrfToken()})
-            } else {
+            if (err) throw err
+            if (data) res.send({message: 'User exist already.', csrfToken: req.csrfToken()})
+            if (!data) {
                 //Generate a salt.
                 bcryptjs.genSalt(12, (err, salt) => {
                     if(err) throw err
