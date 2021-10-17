@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Router } from 'express'
 import { csrfMainToken, parseForm } from './csrfToken'
 
