@@ -4,8 +4,10 @@ import morgan from "morgan"
 import helmet from 'helmet'
 import express from "express"
 import rateLimit from 'express-rate-limit'
-
+import cookieParser from 'cookie-parser'
 import { config } from "./config"
+import csrfTestRoute from './csrfTokenTest'
+import { parseForm, csrfLoginToken } from './csrfToken' 
 
 const app = express()
 
@@ -24,6 +26,9 @@ app.use(cors({
     credentials: true
 }))
 
+// We need this because "cookie" is true in csrfProtection.
+app.use(cookieParser())
+
 //Add 11 layer of security
 app.use(helmet())
 
@@ -34,7 +39,18 @@ app.use(limiter)
 app.use(morgan('dev'))
 app.use(express.json())
 
+//Handle routes.
+app.use(csrfTestRoute)
+
 app.get('/', (req, res) => {
+    res.send("Welcome to incu monsters back-end.")
+})
+
+app.get('/login', csrfLoginToken, (req, res) => {
+    res.send(req.csrfToken())
+})
+
+app.post('/login', parseForm, csrfLoginToken, (req, res) => {
     res.send("Welcome to incu monsters back-end.")
 })
 

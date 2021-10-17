@@ -13,3 +13,18 @@ GET {{api}}/user/profile
 auth_token: 
 
 ###
+GET {{api}}/token
+
+###
+POST {{api}}/token
+CSRF-Token: tzGe7wsF-JRv4VNdJAhqUIk33abEZ2E0dOso
+
+###
+GET {{api}}/login
+
+###
+POST {{api}}/login
+CSRF-Token: tzGe7wsF-JRv4VNdJAhqUIk33abEZ2E0dOso
+
+
+
