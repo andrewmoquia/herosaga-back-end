@@ -1,8 +1,19 @@
+import cors from "cors"
+import morgan from "morgan"
 import express from "express"
 import { config } from "./config"
-import morgan from "morgan";
+
 
 const app = express()
+
+// Allow test in localhost:3000
+app.set('trust proxy', 1)
+
+//Site that allow to make request in API
+app.use(cors({
+    origin: 'http:localhost:4000', 
+    credentials: true
+}))
 
 //Console request action in HTTP
 app.use(morgan('dev'))
