@@ -20,3 +20,11 @@ export const csrfLoginToken = csrf({ cookie: {
     httpOnly: false,
     maxAge: 60 * 30 //30 minutes
 }})
+
+export const csrfSignupToken = csrf({ cookie: {
+    key: 'crr',
+    sameSite: 'none',
+    secure: false,
+    httpOnly: false,
+    maxAge: 60 * 30 //30 minutes
+}})
