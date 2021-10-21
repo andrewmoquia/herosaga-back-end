@@ -1,15 +1,15 @@
 import { Router } from 'express'
 import User from '../user'
 import bcryptjs from 'bcryptjs'
-import { csrfSignupToken, parseForm } from '../csrfToken'
+import { csrfAuthenticate, parseForm } from '../csrfToken'
 
 const router = Router()
 
-router.get('/signup', csrfSignupToken, (req, res) => {
+router.get('/signup', csrfAuthenticate, (req, res) => {
     res.send(req.csrfToken())
 })
 
-router.post('/signup', parseForm,  csrfSignupToken, (req, res)=> {
+router.post('/signup', parseForm,  csrfAuthenticate, (req, res)=> {
     const {email, username, password, confirmPassword} = req.body;
     if(!email || !username || !password || !confirmPassword) {
         res.send({message: 'All field required', csrfToken: req.csrfToken()})

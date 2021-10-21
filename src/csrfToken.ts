@@ -4,27 +4,10 @@ import bodyParser from 'body-parser'
 export const parseForm = bodyParser.urlencoded({extended: false})
 
 //Setup csrf route middleware
-export const csrfMainToken = csrf({ cookie: {
+export const csrfAuthenticate = csrf({ cookie: {
     key: 'a.s',
-    sameSite: 'none',
-    secure: false,
-    httpOnly: false,
-    maxAge: 60 * 30 //30 minutes
-}})
-
-//Setup csrf route middleware
-export const csrfLoginToken = csrf({ cookie: {
-    key: 'l.t',
-    sameSite: 'none',
-    secure: false,
-    httpOnly: false,
-    maxAge: 60 * 30 //30 minutes
-}})
-
-export const csrfSignupToken = csrf({ cookie: {
-    key: 'crr',
-    sameSite: 'none',
-    secure: false,
-    httpOnly: false,
+    sameSite: 'strict',
+    secure: true,
+    httpOnly: true,
     maxAge: 60 * 30 //30 minutes
 }})
