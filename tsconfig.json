@@ -1,24 +1,25 @@
 {
-    "compilerOptions": {
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": ".",
-        "outDir": "build/dist",
-        "module": "commonjs",
-        "target": "es5",
-        "lib": [
-            "es6",
-            "dom"
-        ],
-        "sourceMap": false,
-        "skipLibCheck": true,
-        "allowJs": true,
-        "jsx": "react",
-        "moduleResolution": "node",
-        "rootDir": "src",
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true
-    },
+   "compilerOptions": {
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "baseUrl": ".",
+      "outDir": "build/dist",
+      "module": "commonjs",
+      "target": "es5",
+      "lib": ["es6", "dom"],
+      "sourceMap": false,
+      "skipLibCheck": true,
+      "allowJs": true,
+      "strict": true,
+      "jsx": "react",
+      "moduleResolution": "node",
+      "forceConsistentCasingInFileNames": true,
+      "noFallthroughCasesInSwitch": true,
+      "rootDir": "src",
+      "noImplicitReturns": true,
+      "noImplicitThis": true,
+      "noImplicitAny": true,
+      "strictNullChecks": true,
+      "typeRoots": ["./@types", "node_modules/@types"]
+   }
 }

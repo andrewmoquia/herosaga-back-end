@@ -1,31 +1,33 @@
 import './database'
-import cors from "cors"
-import morgan from "morgan"
+import cors from 'cors'
+import morgan from 'morgan'
 import helmet from 'helmet'
-import express from "express"
+import express from 'express'
 import cookieParser from 'cookie-parser'
-import { config } from "./config"
-import signupRoute from './routes/registerRoutes' 
+import { config } from './config'
+import signupRoute from './routes/registerRoutes'
 import passport from 'passport'
 import loginRoute from './routes/loginRoute'
+import verifyEmail from './routes/verifyEmail'
+import forgotPassword from './routes/forgotPassword'
 import { limiter } from './limiter'
-import {authenticateJWT} from './passportSetup'
-import {csrfAuthenticate, parseForm} from './csrfToken'
+import { csrfAuthenticate } from './csrfToken'
 
 const app = express()
-
 
 // Allow test in localhost:3000
 app.set('trust proxy', 1)
 
 //Site that allow to make request in API
-app.use(cors({
-    origin: 'http://localhost:3000', 
-    credentials: true
-}))
+app.use(
+   cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+   })
+)
 
 // We need this because "cookie" is true in csrfProtection.
-app.use(cookieParser())
+app.use(cookieParser('secret'))
 
 //Add 11 layer of security
 app.use(helmet())
@@ -43,25 +45,18 @@ app.use(passport.initialize())
 //Handle routes.
 app.use(signupRoute)
 app.use(loginRoute)
+app.use(verifyEmail)
+app.use(forgotPassword)
 
 app.get('/', csrfAuthenticate, (req, res) => {
-    try {
-         res.send(req.csrfToken())
-    } catch (error) {
-        if(error) throw error
-    }
-})
-
-app.get('/protected', authenticateJWT, (req, res) => {
-    try {
-        res.status(200).send({message: 'Successfully get into protected route.'})
-    } catch (error) {
-        if(error) throw error
-    }
-   
+   try {
+      res.send(req.csrfToken())
+   } catch (error) {
+      if (error) throw error
+   }
 })
 
 //Live our server
 app.listen(config.PORT, () => {
-    console.log("Server is up!")
+   console.log('Server is up!')
 })
