@@ -4,7 +4,7 @@
    "description": "��#\u0000 \u0000i\u0000n\u0000c\u0000u\u0000m\u0000o\u0000n\u0000s\u0000-\u0000b\u0000a\u0000c\u0000k\u0000-\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
    "main": "index.js",
    "scripts": {
-      "dev": "nodemon --exec ts-node src/index.ts",
+      "start": "nodemon --exec ts-node src/index.ts",
       "format": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
       "lint": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx,json}\"",
       "test": "echo \"Error: no test specified\" && exit 1"
@@ -42,8 +42,7 @@
       "nodemailer": "^6.7.0",
       "passport": "^0.5.0",
       "passport-jwt": "^4.0.0",
-      "passport-local": "^1.0.0",
-      "rate-limit-mongo": "^2.3.2"
+      "passport-local": "^1.0.0"
    },
    "devDependencies": {
       "@types/bcryptjs": "^2.4.2",
