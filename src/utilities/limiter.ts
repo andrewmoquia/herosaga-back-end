@@ -62,7 +62,7 @@ export const registerLimit = rateLimit({
    },
 })
 
-export const forgotPasswordLimit = rateLimit({
+export const forgotPW = rateLimit({
    store: new MongoStore({
       uri: `${config.DATABASE}`,
       collectionName: 'forgotPasswordLimit',

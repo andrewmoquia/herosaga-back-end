@@ -17,6 +17,11 @@ export const resSendMsg = (res: any, stat: number, msg: any) => {
    return res.end()
 }
 
+export const findUserByUsername = async (res: any, username: any) => {
+   const user = await User.findOne({ username }).exec()
+   return user ? user : resSendMsg(res, 400, 'User does not exist!')
+}
+
 export const reqLoginUser = (req: any, res: any, payload: any, user: any) => {
    const token = createJWTToken(payload)
    req.logIn(payload, { session: false }, (err: any) => {
@@ -53,13 +58,10 @@ export const authenticateLogin = (req: any, res: any, next: any) => {
 
 export const addUserToDatabase = (res: any, data: any) => {
    const { email, username, password } = data
-   //Generate a salt.
    bcryptjs.genSalt(12, (err, salt) => {
       if (err) throw err
-      //Hash the password.
       bcryptjs.hash(password, salt, async (err, hash) => {
          if (err) throw err
-         //Create new user in the database
          const newUser = await new User({
             username,
             email,
@@ -95,17 +97,14 @@ export const findAndRegisterUser = (res: any, data: any) => {
       : findUserRegistration(res, data)
 }
 
-export const sendURLToEmail = async (req: any, res: any, verificationURL: string) => {
-   const decodedJwt: any = decodeJWT(req.cookies.jwt)
+export const sendURLToEmail = async (res: any, verificationURL: any, msg: any, userEmail: any) => {
    const sendEmail = await transporer.sendMail({
       from: 'heartweb09@gmail.com',
-      to: `${decodedJwt.email}`,
-      subject: 'Confirm Email',
-      html: `Please click this email to confirm your email: <a href="${verificationURL}">${verificationURL}</a>`,
+      to: `${userEmail}`,
+      subject: `${msg[3]}`,
+      html: `${msg[1]}: <a href="${verificationURL}">${verificationURL}</a>`,
    })
-   return sendEmail
-      ? resSendMsg(res, 200, 'Verification sent! Check your email inbox or spam folder.')
-      : resSendMsg(res, 500, 'Something went wrong!')
+   return sendEmail ? resSendMsg(res, 200, msg[2]) : resSendMsg(res, 500, 'Something went wrong!')
 }
 
 export const createUrlVerifToken = (req: any, res: any) => {
@@ -116,7 +115,12 @@ export const createUrlVerifToken = (req: any, res: any) => {
    }
    const emailToken = createJWTToken(payload)
    const url = `http://localhost:3000/verify/account/${emailToken}`
-   return sendURLToEmail(req, res, url)
+   const msg = {
+      1: 'Please click this to confirm your email',
+      2: 'Verification sent! Check your email inbox or spam folder.',
+      3: 'Verify your account.',
+   }
+   return sendURLToEmail(res, url, msg, decodedJwt.email)
 }
 
 export const updateVerifyStatOfUser = async (res: any, token: any) => {
@@ -129,4 +133,50 @@ export const updateVerifyStatOfUser = async (res: any, token: any) => {
    } else {
       return resSendMsg(res, 400, 'Link expired. Try again.')
    }
+}
+
+export const createResetPwLink = (res: any, payload: any, userEmail: any) => {
+   const emailToken = createJWTToken(payload)
+   const url = `http://localhost:3000/reset/password/${emailToken}`
+   const msg = {
+      1: 'Please click this to reset your password',
+      2: 'Forgot password request sent! Check your email inbox or spam folder.',
+      3: 'Reset Password Request',
+   }
+   sendURLToEmail(res, url, msg, userEmail)
+}
+
+export const sendResetLinkToEmail = async (req: any, res: any) => {
+   const { username } = req.body
+   const user: any = await findUserByUsername(res, username)
+   if (user) {
+      const payload = {
+         email: `${user.email}`,
+         expires: Date.now() + parseInt('1000000'),
+      }
+      return createResetPwLink(res, payload, user.email)
+   }
+}
+
+export const changeUserPassword = (res: any, password: any, vrfiedToken: any) => {
+   bcryptjs.genSalt(12, (err, salt) => {
+      if (err) throw err
+      bcryptjs.hash(password, salt, async (err, hash) => {
+         if (err) throw err
+         const user = await User.findOneAndUpdate({ email: vrfiedToken?.email }, { password: hash })
+         return user
+            ? resSendMsg(res, 200, 'Password successfully reset.')
+            : resSendMsg(res, 500, 'Something went wrong. Try again later.')
+      })
+   })
+}
+
+export const resetUserPassword = (req: any, res: any) => {
+   const { password, confirmPassword } = req.body
+   const verifiedToken: any = verifyToken(req.params.token)
+   return password !== confirmPassword
+      ? resSendMsg(res, 400, "Password don't match!")
+      : password === confirmPassword && verifiedToken?.expires > Date.now()
+      ? changeUserPassword(res, password, verifiedToken)
+      : resSendMsg(res, 400, 'Link expired. Try again.')
 }

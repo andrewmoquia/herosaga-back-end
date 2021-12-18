@@ -47,3 +47,19 @@ export const verifyUser = (req: any, res: any) => {
       if (err) return srvc.resSendMsg(res, 500, err)
    }
 }
+
+export const forgotPassword = (req: any, res: any) => {
+   try {
+      srvc.sendResetLinkToEmail(req, res)
+   } catch (err) {
+      if (err) return srvc.resSendMsg(res, 500, err)
+   }
+}
+
+export const resetPassword = (req: any, res: any) => {
+   try {
+      srvc.resetUserPassword(req, res)
+   } catch (err) {
+      if (err) return srvc.resSendMsg(res, 500, err)
+   }
+}
