@@ -1,9 +1,9 @@
 import nodeMailer from 'nodemailer'
 import { Router } from 'express'
-import { authenticateJWT } from '../passportSetup'
+import { authenticateJWT } from '../service/passportSetup'
 import jwtDecode from 'jwt-decode'
 import jwt from 'jsonwebtoken'
-import User from '../user'
+import User from '../model/user'
 
 const router = Router()
 
@@ -18,20 +18,19 @@ const transporer = nodeMailer.createTransport({
 const secret = 'asdasdadawad3471984787d8sda'
 
 router.get('/verify/email', authenticateJWT, async (req, res) => {
+   //Get the jwt cookie with user's info from the user's web browser
    const jwtCookie = req.cookies.jwt
+   //Decode the cookie
    const decodedJwt: any = jwtDecode(jwtCookie)
-
    console.log(decodedJwt)
-
+   //Create jwt cookie with user's email address
    const payload = {
       email: `${decodedJwt.email}`,
       expires: Date.now() + parseInt('1000000'),
    }
-
    const emailToken = jwt.sign(JSON.stringify(payload), secret)
-
-   const url = `http://localhost:5000/verify/email/${emailToken}`
-
+   const url = `http://localhost:3000/verify/account/${emailToken}`
+   //Send the new jwt cookie to the email of the user
    try {
       const sendEmail = await transporer.sendMail({
          from: 'heartweb09@gmail.com',
@@ -39,14 +38,19 @@ router.get('/verify/email', authenticateJWT, async (req, res) => {
          subject: 'Confirm Email',
          html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
       })
-      if (sendEmail) res.status(200).send({ status: 200, message: 'Verification sent!' })
-      if (!sendEmail)
+      if (sendEmail) {
          res.status(200).send({
-            status: 500,
-            message: 'Something went wrong from the server. Try again later.',
+            status: 200,
+            message: 'Verification sent! Check your email inbox or spam folder.',
          })
+         return res.end()
+      }
    } catch (error) {
-      if (error) throw error
+      res.status(200).send({
+         status: 500,
+         message: 'Something went wrong from the server. Try again later.',
+      })
+      return res.end()
    }
 })
 
@@ -56,11 +60,20 @@ router.get('/verify/email/:token', async (req, res) => {
 
    if (verify?.expires > Date.now()) {
       const user = await User.findOneAndUpdate({ email: verify?.email }, { isVerified: true })
-      if (!user)
+      if (!user) {
          res.status(200).send({ status: 500, message: 'Something went wrong. Try again later.' })
-      if (user) res.redirect('http://localhost:3000/login')
+         return res.end()
+      }
+      if (user) {
+         res.status(200).send({
+            status: 200,
+            message: 'Account verified. You can now login. Redirecting to login page...',
+         })
+         return res.end()
+      }
    } else {
       res.status(200).send({ status: 400, message: 'Link expired. Try again.' })
+      return res.end()
    }
 })
 

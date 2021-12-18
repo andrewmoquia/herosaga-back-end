@@ -1,4 +1,4 @@
-@api = http://localhost:3000
+@api = http://localhost:5000
 
 POST {{api}}/login
 Content-Type: application/json
@@ -25,17 +25,15 @@ GET {{api}}/login
 ###
 GET {{api}}/signup
 
-
 ###
-POST {{api}}/signup
-CSRF-Token: Cx0J5Yzx-st94Z08zkrkl5Y0NH-zqhZV3NCk
+POST {{api}}/register
 Content-Type: application/json
 
 {
-    "username": "totoypogi",
-    "password": "totoypogi123",
-    "email": "totoypogi123@gmail.com",
-    "confirmPassword": "totoypogi123"
+    "username": "totoypogi123",
+    "password": "123",
+    "email": "andrewmoquia09@gmail.com",
+    "confirmPassword": "123"
 }
 
 ###
@@ -56,3 +54,6 @@ GET {{api}}/user
 
 ###
 GET {{api}}/logout
+
+###
+GET {{api}}/register

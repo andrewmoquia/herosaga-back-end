@@ -9,4 +9,4 @@ const UserSchema = new Schema({
    provider: { type: String, required: true },
 })
 
-export default model('User', UserSchema)
+export default model('User', UserSchema, 'users')

@@ -14,7 +14,7 @@ export const limiter = rateLimit({
    max: 300, // limit each IP to 200 requests per windowMs
 })
 
-export const loginLimiter = rateLimit({
+export const login = rateLimit({
    store: new MongoStore({
       uri: `${config.DATABASE}`,
       collectionName: 'loginLimit',
@@ -22,7 +22,7 @@ export const loginLimiter = rateLimit({
       errorHandler: console.error.bind(null, 'rate-limit-mongo'),
    }),
    windowMs: 10 * 60 * 1000, // 15 minutes
-   max: 10, // limit each IP requests per windowMs
+   max: 200, // limit each IP requests per windowMs
    statusCode: 200,
    message: {
       status: 429,
@@ -54,7 +54,7 @@ export const registerLimit = rateLimit({
       errorHandler: console.error.bind(null, 'rate-limit-mongo'),
    }),
    windowMs: 24 * 60 * 60 * 1000, // 24 hours
-   max: 5, // limit each IP requests per windowMs
+   max: 100, // limit each IP requests per windowMs
    statusCode: 200,
    message: {
       status: 429,
@@ -70,7 +70,7 @@ export const forgotPasswordLimit = rateLimit({
       errorHandler: console.error.bind(null, 'rate-limit-mongo'),
    }),
    windowMs: 1 * 60 * 60 * 1000, // 24 hours
-   max: 1, // limit each IP requests per windowMs
+   max: 100, // limit each IP requests per windowMs
    statusCode: 200,
    message: {
       status: 429,

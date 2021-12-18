@@ -1,7 +1,4 @@
 import csrf from 'csurf'
-import bodyParser from 'body-parser'
-
-export const parseForm = bodyParser.urlencoded({ extended: false })
 
 //Setup csrf route middleware
 export const csrfAuthenticate = csrf({

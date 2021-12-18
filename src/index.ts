@@ -1,17 +1,17 @@
-import './database'
+import './utilities/database'
 import cors from 'cors'
 import morgan from 'morgan'
 import helmet from 'helmet'
 import express from 'express'
 import cookieParser from 'cookie-parser'
-import { config } from './config'
-import signupRoute from './routes/registerRoutes'
+import { config } from './utilities/config'
+import registerRoute from './routes/registerRoutes'
 import passport from 'passport'
-import loginRoute from './routes/loginRoute'
+import userRoutes from './routes/user'
 import verifyEmail from './routes/verifyEmail'
 import forgotPassword from './routes/forgotPassword'
-import { limiter } from './limiter'
-import { csrfAuthenticate } from './csrfToken'
+import csfrRoute from './routes/csrf'
+import { limiter } from './utilities/limiter'
 
 const app = express()
 
@@ -25,6 +25,9 @@ app.use(
       credentials: true,
    })
 )
+
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json()) // To parse the incoming requests with JSON payloads
 
 // We need this because "cookie" is true in csrfProtection.
 app.use(cookieParser('secret'))
@@ -43,18 +46,11 @@ app.use(express.json())
 app.use(passport.initialize())
 
 //Handle routes.
-app.use(signupRoute)
-app.use(loginRoute)
+app.use(registerRoute)
+app.use(userRoutes)
 app.use(verifyEmail)
 app.use(forgotPassword)
-
-app.get('/', csrfAuthenticate, (req, res) => {
-   try {
-      res.send(req.csrfToken())
-   } catch (error) {
-      if (error) throw error
-   }
-})
+app.use(csfrRoute)
 
 //Live our server
 app.listen(config.PORT, () => {
