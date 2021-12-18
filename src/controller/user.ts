@@ -26,10 +26,7 @@ export const checkLoggedUser = (req: any, res: any) => {
 
 export const registerUser = (req: any, res: any) => {
    try {
-      const matchPw = srvc.checkPasswordRegistration(res, req.body)
-      if (matchPw === 'proceed') {
-         srvc.findUserRegistration(res, req.body)
-      }
+      srvc.findAndRegisterUser(res, req.body)
    } catch (err) {
       if (err) return srvc.resSendMsg(res, 500, err)
    }
@@ -37,10 +34,7 @@ export const registerUser = (req: any, res: any) => {
 
 export const sendVerifURLToEmail = (req: any, res: any) => {
    try {
-      const verificationURL = srvc.createUrlVerifToken(req)
-      if (verificationURL) {
-         srvc.sendURLToEmail(req, res, verificationURL)
-      }
+      srvc.createUrlVerifToken(req, res)
    } catch (err) {
       if (err) return srvc.resSendMsg(res, 500, err)
    }

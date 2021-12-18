@@ -18,4 +18,8 @@ router.post('/register', limiter.registerLimit, csrfAuthenticate, cntrl.register
 router.get('/verify/email', authenticateJWTLogin, cntrl.sendVerifURLToEmail)
 router.get('/verify/email/:token', csrfAuthenticate, cntrl.verifyUser)
 
+//TO-DO: Refractor forgot pw routes
+router.post('/forgot-password', csrfAuthenticate)
+router.post('/reset/password/:token', limiter.forgotPasswordLimit, csrfAuthenticate)
+
 export default router

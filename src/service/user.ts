@@ -17,6 +17,24 @@ export const resSendMsg = (res: any, stat: number, msg: any) => {
    return res.end()
 }
 
+export const loginUser = (req: any, res: any, token: any, payload: any, user: any) => {
+   req.logIn(payload, { session: false }, (err: any) => {
+      if (err) return resSendMsg(res, 500, err)
+      if (user.isVerified) {
+         res.cookie('jwt', token, { httpOnly: true, sameSite: 'strict', secure: true })
+         return resSendMsg(res, 200, 'Successfully login!')
+      }
+      if (!user.isVerified) {
+         res.status(200).send({
+            status: 401,
+            message: 'You need to verify your account first!',
+            jwt: `${token}`,
+         })
+         return res.end()
+      }
+   })
+}
+
 export const authenticateLogin = (req: any, res: any, next: any) => {
    passport.authenticate('local', { session: false }, (err: Error, user: IMongoUser, info) => {
       if (err) return next(err)
@@ -30,32 +48,8 @@ export const authenticateLogin = (req: any, res: any, next: any) => {
          expires: Date.now() + parseInt('1000000'),
       }
       const token = createJWTToken(payload)
-
-      req.logIn(payload, { session: false }, (err: any) => {
-         if (err) return resSendMsg(res, 500, err)
-         if (user.isVerified) {
-            res.cookie('jwt', token, { httpOnly: true, sameSite: 'strict', secure: true })
-            return resSendMsg(res, 200, 'Successfully login!')
-         }
-         if (!user.isVerified) {
-            res.status(200).send({
-               status: 401,
-               message: 'You need to verify your account first!',
-               jwt: `${token}`,
-            })
-            return res.end()
-         }
-      })
+      loginUser(req, res, token, payload, user)
    })(req, res, next)
-}
-
-export const checkPasswordRegistration = (res: any, data: any) => {
-   const { email, username, password, confirmPassword } = data
-   return !email || !username || !password || !confirmPassword
-      ? resSendMsg(res, 400, 'All fields required')
-      : password != confirmPassword
-      ? resSendMsg(res, 400, "Password don't match.")
-      : 'proceed'
 }
 
 export const addUserToDatabase = (res: any, data: any) => {
@@ -83,9 +77,7 @@ export const addUserToDatabase = (res: any, data: any) => {
 
 export const findUserRegistration = async (res: any, data: any) => {
    const { username, email } = data
-   console.log(data)
    const user = await User.findOne({ $or: [{ username }, { email }] })
-   console.log(user)
    return user === null
       ? addUserToDatabase(res, data)
       : user && user.username === username
@@ -95,15 +87,13 @@ export const findUserRegistration = async (res: any, data: any) => {
       : resSendMsg(res, 500, 'Something went wrong. Try again later.')
 }
 
-export const createUrlVerifToken = (req: any) => {
-   const decodedJwt: any = decodeJWT(req.cookies.jwt)
-   const payload = {
-      email: `${decodedJwt.email}`,
-      expires: Date.now() + parseInt('1000000'),
-   }
-   const emailToken = createJWTToken(payload)
-   const url = `http://localhost:3000/verify/account/${emailToken}`
-   return url
+export const findAndRegisterUser = (res: any, data: any) => {
+   const { email, username, password, confirmPassword } = data
+   return !email || !username || !password || !confirmPassword
+      ? resSendMsg(res, 400, 'All fields required')
+      : password != confirmPassword
+      ? resSendMsg(res, 400, "Password don't match.")
+      : findUserRegistration(res, data)
 }
 
 export const sendURLToEmail = async (req: any, res: any, verificationURL: string) => {
@@ -119,13 +109,24 @@ export const sendURLToEmail = async (req: any, res: any, verificationURL: string
       : resSendMsg(res, 500, 'Something went wrong!')
 }
 
+export const createUrlVerifToken = (req: any, res: any) => {
+   const decodedJwt: any = decodeJWT(req.cookies.jwt)
+   const payload = {
+      email: `${decodedJwt.email}`,
+      expires: Date.now() + parseInt('1000000'),
+   }
+   const emailToken = createJWTToken(payload)
+   const url = `http://localhost:3000/verify/account/${emailToken}`
+   return sendURLToEmail(req, res, url)
+}
+
 export const updateVerifyStatOfUser = async (res: any, token: any) => {
    const jwtToken: any = verifyToken(token)
    if (jwtToken?.expires > Date.now()) {
       const user = await User.findOneAndUpdate({ email: jwtToken?.email }, { isVerified: true })
       return !user
          ? resSendMsg(res, 500, 'Something went wrong. Try again later.')
-         : resSendMsg(res, 500, 'Account verified. You can now login. Redirecting to login page...')
+         : resSendMsg(res, 200, 'Account verified. You can now login. Redirecting to login page...')
    } else {
       return resSendMsg(res, 400, 'Link expired. Try again.')
    }
