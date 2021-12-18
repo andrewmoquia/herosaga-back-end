@@ -17,7 +17,8 @@ export const resSendMsg = (res: any, stat: number, msg: any) => {
    return res.end()
 }
 
-export const loginUser = (req: any, res: any, token: any, payload: any, user: any) => {
+export const reqLoginUser = (req: any, res: any, payload: any, user: any) => {
+   const token = createJWTToken(payload)
    req.logIn(payload, { session: false }, (err: any) => {
       if (err) return resSendMsg(res, 500, err)
       if (user.isVerified) {
@@ -40,15 +41,13 @@ export const authenticateLogin = (req: any, res: any, next: any) => {
       if (err) return next(err)
       if (info) return resSendMsg(res, 400, info.message)
       if (!user) return resSendMsg(res, 500, 'Something went wrong!')
-
       const payload = {
          id: user._id,
          username: user.username,
          email: user.email,
          expires: Date.now() + parseInt('1000000'),
       }
-      const token = createJWTToken(payload)
-      loginUser(req, res, token, payload, user)
+      reqLoginUser(req, res, payload, user)
    })(req, res, next)
 }
 
