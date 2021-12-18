@@ -1,6 +1,6 @@
 import nodeMailer from 'nodemailer'
 import { Router } from 'express'
-import { authenticateJWT } from '../service/passportSetup'
+import { authenticateJWTLogin } from '../service/passportSetup'
 import jwtDecode from 'jwt-decode'
 import jwt from 'jsonwebtoken'
 import User from '../model/user'
@@ -17,12 +17,11 @@ const transporer = nodeMailer.createTransport({
 
 const secret = 'asdasdadawad3471984787d8sda'
 
-router.get('/verify/email', authenticateJWT, async (req, res) => {
+router.get('/verify/email', authenticateJWTLogin, async (req, res) => {
    //Get the jwt cookie with user's info from the user's web browser
    const jwtCookie = req.cookies.jwt
    //Decode the cookie
    const decodedJwt: any = jwtDecode(jwtCookie)
-   console.log(decodedJwt)
    //Create jwt cookie with user's email address
    const payload = {
       email: `${decodedJwt.email}`,

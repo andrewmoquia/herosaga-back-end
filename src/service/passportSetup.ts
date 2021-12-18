@@ -46,7 +46,7 @@ passport.use(
 )
 
 //Authenticate user's session using JWt
-export const authenticateJWT = (req: any, res: any, next: any) => {
+export const authenticateJWTLogin = (req: any, res: any, next: any) => {
    //This is session less meaning to stored session in database
    passport.authenticate('jwt', { session: false }, (err, user, info) => {
       if (err) return next(err)

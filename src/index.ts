@@ -5,7 +5,6 @@ import helmet from 'helmet'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import { config } from './utilities/config'
-import registerRoute from './routes/registerRoutes'
 import passport from 'passport'
 import userRoutes from './routes/user'
 import verifyEmail from './routes/verifyEmail'
@@ -46,7 +45,6 @@ app.use(express.json())
 app.use(passport.initialize())
 
 //Handle routes.
-app.use(registerRoute)
 app.use(userRoutes)
 app.use(verifyEmail)
 app.use(forgotPassword)
