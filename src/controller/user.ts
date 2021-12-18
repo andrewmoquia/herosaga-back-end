@@ -25,15 +25,31 @@ export const checkLoggedUser = (req: any, res: any) => {
 }
 
 export const registerUser = (req: any, res: any) => {
-   const matchPw = srvc.checkPasswordRegistration(res, req.body)
-   if (matchPw === 'proceed') {
-      try {
-         const user: any = srvc.findUserRegistration(res, req.body)
-         if (user === 'proceed') {
-            srvc.addUserToDatabase(res, req.body)
-         }
-      } catch (err) {
-         if (err) return srvc.resSendMsg(res, 500, err)
+   try {
+      const matchPw = srvc.checkPasswordRegistration(res, req.body)
+      if (matchPw === 'proceed') {
+         srvc.findUserRegistration(res, req.body)
       }
+   } catch (err) {
+      if (err) return srvc.resSendMsg(res, 500, err)
+   }
+}
+
+export const sendVerifURLToEmail = (req: any, res: any) => {
+   try {
+      const verificationURL = srvc.createUrlVerifToken(req)
+      if (verificationURL) {
+         srvc.sendURLToEmail(req, res, verificationURL)
+      }
+   } catch (err) {
+      if (err) return srvc.resSendMsg(res, 500, err)
+   }
+}
+
+export const verifyUser = (req: any, res: any) => {
+   try {
+      srvc.updateVerifyStatOfUser(res, req.params.token)
+   } catch (err) {
+      if (err) return srvc.resSendMsg(res, 500, err)
    }
 }

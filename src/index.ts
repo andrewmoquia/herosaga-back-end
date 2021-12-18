@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser'
 import { config } from './utilities/config'
 import passport from 'passport'
 import userRoutes from './routes/user'
-import verifyEmail from './routes/verifyEmail'
+// import verifyEmail from './routes/verifyEmail'
 import forgotPassword from './routes/forgotPassword'
 import csfrRoute from './routes/csrf'
 import { limiter } from './utilities/limiter'
@@ -46,7 +46,7 @@ app.use(passport.initialize())
 
 //Handle routes.
 app.use(userRoutes)
-app.use(verifyEmail)
+// app.use(verifyEmail)
 app.use(forgotPassword)
 app.use(csfrRoute)
 

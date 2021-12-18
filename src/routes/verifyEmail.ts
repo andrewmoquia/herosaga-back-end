@@ -22,6 +22,7 @@ router.get('/verify/email', authenticateJWTLogin, async (req, res) => {
    const jwtCookie = req.cookies.jwt
    //Decode the cookie
    const decodedJwt: any = jwtDecode(jwtCookie)
+   console.log(decodedJwt)
    //Create jwt cookie with user's email address
    const payload = {
       email: `${decodedJwt.email}`,

@@ -3,9 +3,10 @@ import bcryptjs from 'bcryptjs'
 import passportLocal from 'passport-local'
 import passport from 'passport'
 import passportJWT from 'passport-jwt'
+import { config } from '../utilities/config'
+import { resSendMsg } from './user'
 
 const LocalStrategy = passportLocal.Strategy
-
 const JWTStrategy = passportJWT.Strategy
 
 //Use Local Stategy to authenticate the user's credentials
@@ -18,14 +19,16 @@ passport.use(
       async (username, password, done) => {
          try {
             const user = await User.findOne({ username: username }).exec()
-            if (!user)
+            if (user) {
+               const passwordMatch = await bcryptjs.compare(password, user.password)
+               return passwordMatch
+                  ? done(null, user)
+                  : done(null, false, { status: 400, message: 'Invalid username or password!' })
+            } else {
                return done(null, false, { status: 400, message: 'Invalid username or password!' })
-            const passwordMatch = await bcryptjs.compare(password, user.password)
-            if (passwordMatch) return done(null, user)
-            if (!passwordMatch)
-               return done(null, false, { status: 400, message: 'Invalid username or password!' })
-         } catch (error) {
-            return done(error)
+            }
+         } catch (err) {
+            return done(err)
          }
       }
    )
@@ -36,11 +39,10 @@ passport.use(
    new JWTStrategy(
       {
          jwtFromRequest: (req: any) => req.cookies.jwt,
-         secretOrKey: 'secret',
+         secretOrKey: `${config.JWT_SECRET}`,
       },
       (jwtPayload: any, done: any) => {
-         if (Date.now() > jwtPayload.expires) return done('jwt expired')
-         return done(null, jwtPayload)
+         return Date.now() > jwtPayload.expires ? done('jwt expired') : done(null, jwtPayload)
       }
    )
 )
@@ -49,24 +51,21 @@ passport.use(
 export const authenticateJWTLogin = (req: any, res: any, next: any) => {
    //This is session less meaning to stored session in database
    passport.authenticate('jwt', { session: false }, (err, user, info) => {
-      if (err) return next(err)
-      if (info) return res.status(200).send({ status: 400, message: 'Invalid credentials.' })
-      //If user is verified send the user's info
-      if (user.isVerified)
-         return res.status(200).send({
-            status: 200,
-            message: 'Successfully login!',
-            user: {
-               id: user.id,
-               username: user.username,
-               email: user.email,
-            },
-         })
-      //If user is not yet verified proceed to the next arguments
-      if (!user.isVerified) return next()
-      if (!user)
-         return res
-            .status(200)
-            .send({ status: 500, message: 'Something went wrong. Try again later.' })
+      const userData: any = {
+         id: user.id,
+         username: user.username,
+         email: user.email,
+      }
+      return err
+         ? next(err)
+         : info
+         ? resSendMsg(res, 400, 'Invalid credentials.')
+         : user.isVerified
+         ? res.status(200).send({ status: 200, message: 'Successfully login!', userData })
+         : !user.isVerified
+         ? next()
+         : !user
+         ? resSendMsg(res, 500, 'Something went wrong. Try again later.')
+         : resSendMsg(res, 500, 'Something went wrong. Try again later.')
    })(req, res, next)
 }
