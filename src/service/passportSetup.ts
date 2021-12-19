@@ -5,9 +5,12 @@ import passport from 'passport'
 import passportJWT from 'passport-jwt'
 import { config } from '../utilities/config'
 import { resSendMsg } from './user'
-
 const LocalStrategy = passportLocal.Strategy
 const JWTStrategy = passportJWT.Strategy
+
+//TO-DO: Attach user's password hash to the jwt.
+//If the user password has been changed, revoked the jwt validation.
+//Add refresh token to validate user actions aside from session token.
 
 //Use Local Stategy to authenticate the user's credentials
 passport.use(
@@ -64,8 +67,6 @@ export const authenticateJWTLogin = (req: any, res: any, next: any) => {
          ? res.status(200).send({ status: 200, message: 'Successfully login!', userData })
          : !user.isVerified
          ? next()
-         : !user
-         ? resSendMsg(res, 500, 'Something went wrong. Try again later.')
          : resSendMsg(res, 500, 'Something went wrong. Try again later.')
    })(req, res, next)
 }

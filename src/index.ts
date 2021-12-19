@@ -23,8 +23,9 @@ app.use(
    })
 )
 
+// To parse the incoming requests with JSON payloads
+app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(express.json()) // To parse the incoming requests with JSON payloads
 
 // We need this because "cookie" is true in csrfProtection.
 app.use(cookieParser('secret'))
