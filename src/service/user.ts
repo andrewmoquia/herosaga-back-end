@@ -17,6 +17,11 @@ export const resSendMsg = (res: any, stat: number, msg: any) => {
    return res.end()
 }
 
+export const resSendServerErrorMsg = (res: any, err: any) => {
+   if (err) throw err
+   return resSendMsg(res, 500, 'Server error! Please try again later.')
+}
+
 export const findUserByUsername = async (res: any, username: any) => {
    const user = await User.findOne({ username }).exec()
    return user ? user : resSendMsg(res, 400, 'User does not exist!')
@@ -50,6 +55,7 @@ export const authenticateLogin = (req: any, res: any, next: any) => {
          id: user._id,
          username: user.username,
          email: user.email,
+         purpose: 'Login User',
          expires: Date.now() + parseInt('1000000'),
       }
       reqLoginUser(req, res, payload, user)
@@ -111,6 +117,7 @@ export const createUrlVerifToken = (req: any, res: any) => {
    const decodedJwt: any = decodeJWT(req.cookies.jwt)
    const payload = {
       email: `${decodedJwt.email}`,
+      purpose: 'Account Verification',
       expires: Date.now() + parseInt('1000000'),
    }
    const emailToken = createJWTToken(payload)
@@ -125,7 +132,7 @@ export const createUrlVerifToken = (req: any, res: any) => {
 
 export const updateVerifyStatOfUser = async (res: any, token: any) => {
    const jwtToken: any = verifyToken(token)
-   if (jwtToken?.expires > Date.now()) {
+   if (jwtToken.expires > Date.now() && jwtToken.purpose === 'Account Verification') {
       const user = await User.findOneAndUpdate({ email: jwtToken?.email }, { isVerified: true })
       return !user
          ? resSendMsg(res, 500, 'Something went wrong. Try again later.')
@@ -152,6 +159,7 @@ export const sendResetLinkToEmail = async (req: any, res: any) => {
    if (user) {
       const payload = {
          email: `${user.email}`,
+         purpose: 'Password Reset',
          expires: Date.now() + parseInt('1000000'),
       }
       return createResetPwLink(res, payload, user.email)
@@ -173,10 +181,12 @@ export const changeUserPassword = (res: any, password: any, vrfiedToken: any) =>
 
 export const resetUserPassword = (req: any, res: any) => {
    const { password, confirmPassword } = req.body
-   const verifiedToken: any = verifyToken(req.params.token)
+   const vrfiedToken: any = verifyToken(req.params.token)
    return password !== confirmPassword
       ? resSendMsg(res, 400, "Password don't match!")
-      : password === confirmPassword && verifiedToken?.expires > Date.now()
-      ? changeUserPassword(res, password, verifiedToken)
+      : password === confirmPassword &&
+        vrfiedToken.expires > Date.now() &&
+        vrfiedToken.purpose === 'Password Reset'
+      ? changeUserPassword(res, password, vrfiedToken)
       : resSendMsg(res, 400, 'Link expired. Try again.')
 }

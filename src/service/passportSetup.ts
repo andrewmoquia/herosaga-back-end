@@ -45,7 +45,9 @@ passport.use(
          secretOrKey: `${config.JWT_SECRET}`,
       },
       (jwtPayload: any, done: any) => {
-         return Date.now() > jwtPayload.expires ? done('jwt expired') : done(null, jwtPayload)
+         return Date.now() > jwtPayload.expires && jwtPayload.purpose === 'Login User'
+            ? done('jwt expired')
+            : done(null, jwtPayload)
       }
    )
 )
