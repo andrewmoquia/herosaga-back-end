@@ -56,4 +56,6 @@ GET {{api}}/user
 GET {{api}}/logout
 
 ###
-GET {{api}}/register
+GET {{api}}/mint/box/silver
+
+
