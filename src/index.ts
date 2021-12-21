@@ -8,6 +8,7 @@ import { config } from './utilities/config'
 import passport from 'passport'
 import userRoutes from './routes/user'
 import csfrRoute from './routes/csrf'
+import nftRoutes from './routes/nft'
 import { limiter } from './utilities/limiter'
 
 const app = express()
@@ -46,6 +47,7 @@ app.use(passport.initialize())
 //Handle routes.
 app.use(userRoutes)
 app.use(csfrRoute)
+app.use(nftRoutes)
 
 //Live our server
 app.listen(config.PORT, () => {

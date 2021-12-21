@@ -11,7 +11,7 @@ export const limiter = rateLimit({
       errorHandler: console.error.bind(null, 'rate-limit-mongo'),
    }),
    windowMs: 15 * 60 * 1000, // 15 minutes
-   max: 300, // limit each IP to 200 requests per windowMs
+   max: 10000, // limit each IP to 200 requests per windowMs
 })
 
 export const login = rateLimit({
