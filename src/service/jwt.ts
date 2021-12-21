@@ -14,3 +14,7 @@ export const decodeJWT = (jwtCookie: any) => {
 export const verifyToken = (token: any) => {
    return jwt.verify(token, `${config.JWT_SECRET}`)
 }
+
+export const generateRefreshToken = () => {
+   //
+}

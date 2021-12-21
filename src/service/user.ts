@@ -6,9 +6,15 @@ import bcryptjs from 'bcryptjs'
 import { transporer } from '../utilities/transporter'
 
 export const endUserSession = (res: any, req: any, msg: any) => {
-   res.clearCookie('jwt')
    req.logout()
+   res.clearCookie('jwt')
    res.status(200).send({ status: 200, message: msg })
+   return res.end()
+}
+
+export const startUserSession = async (req: any, res: any) => {
+   const userData = await decodeJWT(req.cookies.jwt)
+   res.status(200).send({ status: 200, message: 'Successfully login!', userData })
    return res.end()
 }
 
@@ -27,9 +33,9 @@ export const findUserByUsername = async (res: any, username: any) => {
    return user ? user : resSendMsg(res, 400, 'User does not exist!')
 }
 
-export const reqLoginUser = (req: any, res: any, payload: any, user: any) => {
+export const reqLoginUser = async (req: any, res: any, payload: any, user: any) => {
    const token = createJWTToken(payload)
-   req.logIn(payload, { session: false }, (err: any) => {
+   await req.logIn(payload, { session: false }, (err: any) => {
       if (err) return resSendMsg(res, 500, err)
       if (user.isVerified) {
          res.cookie('jwt', token, { httpOnly: true, sameSite: 'strict', secure: true })
@@ -46,20 +52,25 @@ export const reqLoginUser = (req: any, res: any, payload: any, user: any) => {
    })
 }
 
-export const authenticateLogin = (req: any, res: any, next: any) => {
-   passport.authenticate('local', { session: false }, (err: Error, user: IMongoUser, info) => {
-      if (err) return next(err)
-      if (info) return resSendMsg(res, 400, info.message)
-      if (!user) return resSendMsg(res, 500, 'Something went wrong!')
-      const payload = {
-         id: user._id,
-         username: user.username,
-         email: user.email,
-         purpose: 'Login User',
-         expires: Date.now() + parseInt('1000000'),
+export const authenticateLogin = async (req: any, res: any, next: any) => {
+   await passport.authenticate(
+      'local',
+      { session: false },
+      async (err: Error, user: IMongoUser, info) => {
+         if (err) return next(err)
+         if (info) return resSendMsg(res, 400, info.message)
+         if (!user) return resSendMsg(res, 500, 'Something went wrong!')
+         const payload = {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            isVerified: user.isVerified,
+            purpose: 'Login User',
+            expires: Date.now() + parseInt('1000000'),
+         }
+         reqLoginUser(req, res, payload, user)
       }
-      reqLoginUser(req, res, payload, user)
-   })(req, res, next)
+   )(req, res, next)
 }
 
 export const addUserToDatabase = (res: any, data: any) => {
@@ -74,7 +85,7 @@ export const addUserToDatabase = (res: any, data: any) => {
             password: hash,
             provider: 'email',
          })
-         newUser.save((err: any) => {
+         return await newUser.save((err: any) => {
             if (err) throw err
             return resSendMsg(res, 200, 'Account successfully created.')
          })
@@ -94,13 +105,13 @@ export const findUserRegistration = async (res: any, data: any) => {
       : resSendMsg(res, 500, 'Something went wrong. Try again later.')
 }
 
-export const findAndRegisterUser = (res: any, data: any) => {
+export const findAndRegisterUser = async (res: any, data: any) => {
    const { email, username, password, confirmPassword } = data
    return !email || !username || !password || !confirmPassword
       ? resSendMsg(res, 400, 'All fields required')
       : password != confirmPassword
       ? resSendMsg(res, 400, "Password don't match.")
-      : findUserRegistration(res, data)
+      : await findUserRegistration(res, data)
 }
 
 export const sendURLToEmail = async (res: any, verificationURL: any, msg: any, userEmail: any) => {
@@ -113,8 +124,8 @@ export const sendURLToEmail = async (res: any, verificationURL: any, msg: any, u
    return sendEmail ? resSendMsg(res, 200, msg[2]) : resSendMsg(res, 500, 'Something went wrong!')
 }
 
-export const createUrlVerifToken = (req: any, res: any) => {
-   const decodedJwt: any = decodeJWT(req.cookies.jwt)
+export const createUrlVerifToken = async (req: any, res: any) => {
+   const decodedJwt: any = await decodeJWT(req.cookies.jwt)
    const payload = {
       email: `${decodedJwt.email}`,
       purpose: 'Account Verification',
@@ -127,7 +138,7 @@ export const createUrlVerifToken = (req: any, res: any) => {
       2: 'Verification sent! Check your email inbox or spam folder.',
       3: 'Verify your account.',
    }
-   return sendURLToEmail(res, url, msg, decodedJwt.email)
+   return await sendURLToEmail(res, url, msg, decodedJwt.email)
 }
 
 export const updateVerifyStatOfUser = async (res: any, token: any) => {
@@ -142,7 +153,7 @@ export const updateVerifyStatOfUser = async (res: any, token: any) => {
    }
 }
 
-export const createResetPwLink = (res: any, payload: any, userEmail: any) => {
+export const createResetPwLink = async (res: any, payload: any, userEmail: any) => {
    const emailToken = createJWTToken(payload)
    const url = `http://localhost:3000/reset/password/${emailToken}`
    const msg = {
@@ -150,7 +161,7 @@ export const createResetPwLink = (res: any, payload: any, userEmail: any) => {
       2: 'Forgot password request sent! Check your email inbox or spam folder.',
       3: 'Reset Password Request',
    }
-   sendURLToEmail(res, url, msg, userEmail)
+   await sendURLToEmail(res, url, msg, userEmail)
 }
 
 export const sendResetLinkToEmail = async (req: any, res: any) => {
@@ -162,7 +173,7 @@ export const sendResetLinkToEmail = async (req: any, res: any) => {
          purpose: 'Password Reset',
          expires: Date.now() + parseInt('1000000'),
       }
-      return createResetPwLink(res, payload, user.email)
+      return await createResetPwLink(res, payload, user.email)
    }
 }
 
@@ -179,7 +190,7 @@ export const changeUserPassword = (res: any, password: any, vrfiedToken: any) =>
    })
 }
 
-export const resetUserPassword = (req: any, res: any) => {
+export const resetUserPassword = async (req: any, res: any) => {
    const { password, confirmPassword } = req.body
    const vrfiedToken: any = verifyToken(req.params.token)
    return password !== confirmPassword
