@@ -1,65 +1,65 @@
 import * as srvc from '../service/user'
 
-export const loginUser = (req: any, res: any, next: any) => {
+export const loginUser = async (req: any, res: any, next: any) => {
    try {
-      srvc.authenticateLogin(req, res, next)
+      return await srvc.authenticateLogin(req, res, next)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const logoutUser = (req: any, res: any) => {
+export const logoutUser = async (req: any, res: any) => {
    try {
-      srvc.endUserSession(res, req, 'Successfully logout!')
+      return await srvc.endUserSession(res, req, 'Successfully logout!')
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const checkLoggedUser = (req: any, res: any) => {
+export const checkLoggedUser = async (req: any, res: any) => {
    try {
-      srvc.endUserSession(res, req, 'User is not verified.')
+      return await srvc.startUserSession(req, res)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const registerUser = (req: any, res: any) => {
+export const registerUser = async (req: any, res: any) => {
    try {
-      srvc.findAndRegisterUser(res, req.body)
+      return await srvc.findAndRegisterUser(res, req.body)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const sendVerifURLToEmail = (req: any, res: any) => {
+export const sendVerifURLToEmail = async (req: any, res: any) => {
    try {
-      srvc.createUrlVerifToken(req, res)
+      return await srvc.createUrlVerifToken(req, res)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const verifyUser = (req: any, res: any) => {
+export const verifyUser = async (req: any, res: any) => {
    try {
-      srvc.updateVerifyStatOfUser(res, req.params.token)
+      return await srvc.updateVerifyStatOfUser(res, req.params.token)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const forgotPassword = (req: any, res: any) => {
+export const forgotPassword = async (req: any, res: any) => {
    try {
-      srvc.sendResetLinkToEmail(req, res)
+      return await srvc.sendResetLinkToEmail(req, res)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }
 
-export const resetPassword = (req: any, res: any) => {
+export const resetPassword = async (req: any, res: any) => {
    try {
-      srvc.resetUserPassword(req, res)
+      return await srvc.resetUserPassword(req, res)
    } catch (err) {
-      srvc.resSendServerErrorMsg(res, err)
+      return await srvc.resSendServerErrorMsg(res, err)
    }
 }

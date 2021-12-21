@@ -4,7 +4,7 @@ import passportLocal from 'passport-local'
 import passport from 'passport'
 import passportJWT from 'passport-jwt'
 import { config } from '../utilities/config'
-import { resSendMsg } from './user'
+import { resSendMsg, endUserSession } from './user'
 const LocalStrategy = passportLocal.Strategy
 const JWTStrategy = passportJWT.Strategy
 
@@ -45,8 +45,9 @@ passport.use(
          secretOrKey: `${config.JWT_SECRET}`,
       },
       (jwtPayload: any, done: any) => {
+         //TO-DO: Check for user's hash pw if match in the database
          return Date.now() > jwtPayload.expires && jwtPayload.purpose === 'Login User'
-            ? done('jwt expired')
+            ? done('Expired session logout and login again.')
             : done(null, jwtPayload)
       }
    )
@@ -56,19 +57,14 @@ passport.use(
 export const authenticateJWTLogin = (req: any, res: any, next: any) => {
    //This is session less meaning to stored session in database
    passport.authenticate('jwt', { session: false }, (err, user, info) => {
-      const userData: any = {
-         id: user.id,
-         username: user.username,
-         email: user.email,
-      }
       return err
          ? next(err)
          : info
          ? resSendMsg(res, 400, 'Invalid credentials.')
          : user.isVerified
-         ? res.status(200).send({ status: 200, message: 'Successfully login!', userData })
-         : !user.isVerified
          ? next()
+         : !user.isVerified
+         ? endUserSession(req, res, 'User is not verified.')
          : resSendMsg(res, 500, 'Something went wrong. Try again later.')
    })(req, res, next)
 }

@@ -15,11 +15,11 @@ router.get('/check-logged-in-user', authenticateJWTLogin, cntrl.checkLoggedUser)
 router.post('/register', lmtr.registerLimit, csrfAuth, cntrl.registerUser)
 
 //Routes for verifying user
-router.get('/verify/email', authenticateJWTLogin, cntrl.sendVerifURLToEmail)
+router.get('/verify/email', csrfAuth, cntrl.sendVerifURLToEmail)
 router.get('/verify/email/:token', csrfAuth, cntrl.verifyUser)
 
 //Routes for forgot password reset
 router.post('/forgot-password', csrfAuth, cntrl.forgotPassword)
-router.post('/reset/password/:token', lmtr.forgotPW, csrfAuth, cntrl.resetPassword)
+router.put('/reset/password/:token', lmtr.forgotPW, csrfAuth, cntrl.resetPassword)
 
 export default router
