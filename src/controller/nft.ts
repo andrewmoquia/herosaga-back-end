@@ -1,10 +1,15 @@
-import * as srvc from '../service/nft'
-import { resSendServerErrorMsg } from '../service/user'
+import { createNFT } from '../service/nft.create'
+import { sellNFTOnMarketplace, buyNFTOnMarketplace } from '../service/nft.marketplace'
+import { asyncWrapper } from '../middleware/async'
 
-export const mintNFT = async (req: any, res: any) => {
-   try {
-      return await srvc.createNFT(req, res)
-   } catch (err) {
-      return await resSendServerErrorMsg(res, err)
-   }
-}
+export const mintNFT = asyncWrapper(async (req: any, res: any, next: any) => {
+   return await createNFT(req, res, next)
+})
+
+export const sellNFT = asyncWrapper(async (req: any, res: any) => {
+   return await sellNFTOnMarketplace(req, res)
+})
+
+export const buyNFT = asyncWrapper(async (req: any, res: any) => {
+   return await buyNFTOnMarketplace(req, res)
+})

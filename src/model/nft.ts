@@ -11,7 +11,10 @@ const NFTSchema = new Schema({
       defense: { type: Number, required: true },
       health: { type: Number, required: true },
    },
-   status: { type: String, required: true },
+   isForSale: { type: Boolean, default: false },
+   price: { type: Number, default: false },
+   dateMinted: { type: Date },
+   datePostedOnMarketplace: { type: Date },
 })
 
 export default model('NFT', NFTSchema, 'nft')

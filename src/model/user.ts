@@ -7,6 +7,7 @@ const UserSchema = new Schema({
    isVerified: { type: Boolean, default: false },
    googleId: { type: String, required: false },
    provider: { type: String, required: true },
+   balance: { type: Number, default: 500 },
 })
 
 export default model('User', UserSchema, 'users')

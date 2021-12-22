@@ -12,12 +12,6 @@ export const endUserSession = (res: any, req: any, msg: any) => {
    return res.end()
 }
 
-export const startUserSession = async (req: any, res: any) => {
-   const userData = await decodeJWT(req.cookies.jwt)
-   res.status(200).send({ status: 200, message: 'Successfully login!', userData })
-   return res.end()
-}
-
 export const resSendMsg = (res: any, stat: number, msg: any) => {
    res.status(200).send({ status: stat, message: msg })
    return res.end()
@@ -28,9 +22,27 @@ export const resSendServerErrorMsg = (res: any, err: any) => {
    return resSendMsg(res, 500, 'Server error! Please try again later.')
 }
 
-export const findUserByUsername = async (res: any, username: any) => {
-   const user = await User.findOne({ username }).exec()
+export const findUserByID = async (res: any, _id: any) => {
+   const user = await User.findOne({ _id })
    return user ? user : resSendMsg(res, 400, 'User does not exist!')
+}
+
+export const findUserByUsername = async (res: any, username: any) => {
+   const user = await User.findOne({ username })
+   return user ? user : resSendMsg(res, 400, 'User does not exist!')
+}
+
+export const startUserSession = async (req: any, res: any) => {
+   const decodedJWT: any = await decodeJWT(req.cookies.jwt)
+   const foundUser = await findUserByID(res, decodedJWT.id)
+   const user = {
+      id: foundUser.id,
+      username: foundUser.username,
+      email: foundUser.email,
+      balance: foundUser.balance,
+   }
+   res.status(200).send({ status: 200, message: 'Successfully login!', user })
+   return res.end()
 }
 
 export const reqLoginUser = async (req: any, res: any, payload: any, user: any) => {

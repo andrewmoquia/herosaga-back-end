@@ -7,5 +7,7 @@ const router = Router()
 
 //TO-DO: Allow minting multiple boxes at the same time
 router.get('/mint/box/:box', cntrl.mintNFT)
+router.post('/sell/nft/:id', cntrl.sellNFT)
+router.post('/buy/nft/:id', cntrl.sellNFT)
 
 export default router

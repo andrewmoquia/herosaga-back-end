@@ -2,7 +2,7 @@ import { nftRarityChances, nftCharacters, nftAttributes } from '../utilities/nft
 import { INFTCharacters, INFTAttributes } from '../utilities/interfaces'
 import NFT from '../model/nft'
 import { decodeJWT } from './jwt'
-import { resSendMsg } from './user'
+import { createNFTMintingTransaction, finalizeMintingNFTTransac } from './transactions'
 
 export const generateRandomNFTStats = (mintedRarity: string) => {
    //Get the attributes of minted rarity
@@ -56,39 +56,69 @@ export const generateRandomNFTRarity = (box: any) => {
 export const registerMintedNFT = async (
    req: any,
    res: any,
+   next: any,
    attribs: any,
    rarity: any,
-   name: any
+   name: any,
+   transaction: any
 ) => {
-   const decodedJWT: any = await decodeJWT(req.cookies.jwt)
-   const mintedNFt = await new NFT({
-      ownerID: decodedJWT.id,
-      name,
-      rarity,
-      attributes: {
-         physicalAttack: attribs.physicalAttack,
-         magicAttack: attribs.magicAttack,
-         speed: attribs.speed,
-         defense: attribs.defense,
-         health: attribs.health,
-      },
-      status: 'for-use',
-   })
-   return mintedNFt.save((err: Error) => {
-      if (err) throw err
-      return resSendMsg(res, 200, 'Successfully minted nft')
-   })
+   try {
+      const decodedJWT: any = await decodeJWT(req.cookies.jwt)
+      const mintedNFt = await new NFT({
+         ownerID: decodedJWT.id,
+         name,
+         rarity,
+         attributes: {
+            physicalAttack: attribs.physicalAttack,
+            magicAttack: attribs.magicAttack,
+            speed: attribs.speed,
+            defense: attribs.defense,
+            health: attribs.health,
+         },
+         dateMinted: Date.now(),
+      })
+      //T0-DO: After successfully creating the nft model,
+      //update the transaction to be successful before saving in the database.
+      const finalTransaction = await finalizeMintingNFTTransac(transaction, mintedNFt, next)
+      if (finalTransaction) {
+         return mintedNFt.save((err: Error) => {
+            if (err) next(err)
+            res.status(200).send({
+               status: 200,
+               message: 'Sucessfully minted an NFT.',
+               payload: mintedNFt,
+            })
+            return res.end()
+         })
+      }
+   } catch (err) {
+      next(err)
+   }
 }
 
-export const createNFT = async (req: any, res: any) => {
-   //TO-DO: Create transaction record for every minting
-   // createTransaction()
-   //Generate nft rarity based on box
-   const mintedRarity = generateRandomNFTRarity(req.params.box)
-   //Generate nft stats based on rarity
-   const generateAttributes = generateRandomNFTStats(mintedRarity)
-   //Generate nft character based on rarity
-   const mintedCharacter = await generateRandomNFTChar(mintedRarity)
-   //Register created nft to the database
-   await registerMintedNFT(req, res, generateAttributes, mintedRarity, mintedCharacter)
+export const createNFT = async (req: any, res: any, next: any) => {
+   try {
+      //Create transaction record for every minting
+      const transaction = await createNFTMintingTransaction(req, next)
+      if (transaction) {
+         //Generate nft rarity based on box
+         const mintedRarity = generateRandomNFTRarity(req.params.box)
+         //Generate nft stats based on rarity
+         const generateAttributes = generateRandomNFTStats(mintedRarity)
+         //Generate nft character based on rarity
+         const mintedCharacter = await generateRandomNFTChar(mintedRarity)
+         //Register created nft to the database
+         return await registerMintedNFT(
+            req,
+            res,
+            next,
+            generateAttributes,
+            mintedRarity,
+            mintedCharacter,
+            transaction
+         )
+      }
+   } catch (err) {
+      next(err)
+   }
 }

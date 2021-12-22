@@ -10,6 +10,7 @@ import userRoutes from './routes/user'
 import csfrRoute from './routes/csrf'
 import nftRoutes from './routes/nft'
 import { limiter } from './utilities/limiter'
+import { errorHandlerMiddleware } from './middleware/errorHandler'
 
 const app = express()
 
@@ -48,6 +49,9 @@ app.use(passport.initialize())
 app.use(userRoutes)
 app.use(csfrRoute)
 app.use(nftRoutes)
+
+//Handle error
+app.use(errorHandlerMiddleware)
 
 //Live our server
 app.listen(config.PORT, () => {

@@ -5,6 +5,7 @@ export interface IMongoUser {
    email: String
    isVerified: Boolean
    googleId: String
+   balance: Number
    provider: String
    _v: number
 }
