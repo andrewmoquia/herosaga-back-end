@@ -58,4 +58,8 @@ GET {{api}}/logout
 ###
 GET {{api}}/mint/box/silver
 
+###
+POST {{api}}/sell/nft/61c1c2d621f7baf88f768467
+
+
 

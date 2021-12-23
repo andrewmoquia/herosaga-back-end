@@ -77,19 +77,10 @@ export const registerMintedNFT = async (
          },
          dateMinted: Date.now(),
       })
-      //T0-DO: After successfully creating the nft model,
-      //update the transaction to be successful before saving in the database.
-      const finalTransaction = await finalizeMintingNFTTransac(transaction, mintedNFt, next)
-      if (finalTransaction) {
-         return mintedNFt.save((err: Error) => {
-            if (err) next(err)
-            res.status(200).send({
-               status: 200,
-               message: 'Sucessfully minted an NFT.',
-               payload: mintedNFt,
-            })
-            return res.end()
-         })
+      const saveMintedNFT = await mintedNFt.save()
+      if (saveMintedNFT) {
+         //update the transaction to be successful.
+         return await finalizeMintingNFTTransac(res, next, transaction, mintedNFt)
       }
    } catch (err) {
       next(err)

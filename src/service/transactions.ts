@@ -1,15 +1,27 @@
-import Transaction from '../model/transaction'
+import MintingTransaction from '../model/transac.minting'
 import { decodeJWT } from './jwt'
 import User from '../model/user'
 
-export const finalizeMintingNFTTransac = async (record: any, mintedNFt: any, next: any) => {
+export const finalizeMintingNFTTransac = async (
+   res: any,
+   next: any,
+   record: any,
+   mintedNFt: any
+) => {
    try {
       const updatedRecord = await record.updateOne({
          nftID: mintedNFt.id,
          isNFTTransferred: true,
          dateNFTReceived: Date.now(),
       })
-      if (updatedRecord) return record
+      if (updatedRecord) {
+         res.status(200).send({
+            status: 200,
+            message: 'Sucessfully minted an NFT.',
+            payload: mintedNFt,
+         })
+         return res.end()
+      }
    } catch (err) {
       if (err) next(err)
    }
@@ -24,7 +36,7 @@ export const transferPaymentForMintingBox = async (record: any, next: any) => {
       if (sendPayment) {
          const updatedRecord = await record.updateOne({
             isPaymentReceive: true,
-            datePaymentSend: Date.now(),
+            datePaymentSent: Date.now(),
          })
          if (updatedRecord) return record
       }
@@ -39,7 +51,7 @@ export const deductBalanceForMintingBox = async (user: any, record: any, next: a
       if (deductedPayment) {
          const updatedRecord = await record.updateOne({
             isBuyerPaid: true,
-            dateBuyerPaid: Date.now(),
+            datePaymentDeducted: Date.now(),
          })
          if (updatedRecord) return record
       }
@@ -50,9 +62,10 @@ export const deductBalanceForMintingBox = async (user: any, record: any, next: a
 
 export const createTransaction = async (user: any, next: any) => {
    try {
-      const record = await new Transaction({
+      const record = await new MintingTransaction({
          ownerID: user.id,
          dateCreated: Date.now(),
+         transaction: 'Minting',
       })
       const savedRecord = await record.save()
       if (savedRecord) return record
