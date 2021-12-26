@@ -2,7 +2,7 @@ import { nftRarityChances, nftCharacters, nftAttributes } from '../utilities/nft
 import { INFTCharacters, INFTAttributes } from '../utilities/interfaces'
 import NFT from '../model/nft'
 import { decodeJWT } from './jwt'
-import { createNFTMintingTransaction, finalizeMintingNFTTransac } from './transactions'
+import { createNFTMintingTransaction, finalizeMintingNFTTransac } from './nft.minting'
 
 export const generateRandomNFTStats = (mintedRarity: string) => {
    //Get the attributes of minted rarity

@@ -12,7 +12,7 @@ const NFTSchema = new Schema({
       health: { type: Number, required: true },
    },
    isForSale: { type: Boolean, default: false },
-   price: { type: Number, default: false },
+   sellPrice: { type: Number },
    dateMinted: { type: Date },
    datePostedOnMarketplace: { type: Date },
 })

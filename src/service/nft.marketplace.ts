@@ -1,30 +1,43 @@
 import User from '../model/user'
 import NFT from '../model/nft'
-import BuyingTransacion from '../model/transac.buying'
-import SellingTransaction from '../model/transac.selling'
+import Transaction from '../model/transaction'
 import { decodeJWT } from './jwt'
 import { resSendMsg } from './user'
 
-export const createSellingTransaction = async (next: any, user: any, nftID: any, price: any) => {
+export const createSellingTransaction = async (
+   next: any,
+   recipientID: any,
+   nftID: any,
+   sellPrice: any
+) => {
    try {
-      const transaction = await new SellingTransaction({
-         sellerID: user.id,
+      const transaction = await new Transaction({
+         recipientID,
          nftID,
-         price,
+         sellPrice,
+         transaction: 'Sell',
+         sellTransaction: {
+            isPaymentReceived: false,
+            isNFTTransferred: false,
+         },
       })
       const saveTransaction = await transaction.save()
-      if (saveTransaction) return transaction
+      return saveTransaction
    } catch (err) {
       return next(err)
    }
 }
 
-export const sellNFT = async (res: any, next: any, nft: any, transaction: any) => {
+export const sellNFT = async (res: any, next: any, nft: any, transac: any, sellPrice: any) => {
    try {
-      const sellNFT = await nft.updateOne({ isForSale: true, datePostedOnMarketplace: Date.now() })
+      const sellNFT = await nft.updateOne({
+         isForSale: true,
+         datePostedOnMarketplace: Date.now(),
+         sellPrice,
+      })
       if (sellNFT) {
-         const updateTransaction = await transaction.updateOne({ dateCreated: Date.now() })
-         if (updateTransaction) {
+         const updateTransac = await transac.updateOne({ 'sellTransaction.isActive': true })
+         if (updateTransac) {
             return resSendMsg(res, 200, 'Your NFT is now posted in marketplace.')
          }
       }
@@ -35,22 +48,26 @@ export const sellNFT = async (res: any, next: any, nft: any, transaction: any) =
 
 export const sellNFTOnMarketplace = async (req: any, res: any, next: any) => {
    try {
-      const user: any = await decodeJWT(req.cookies.jwt)
+      const seller: any = await decodeJWT(req.cookies.jwt)
       const nftID = req.params.id
-      const price = req.params.price
+      const sellPrice = req.params.price
       const nft = await NFT.findById({ _id: nftID })
-      const findTransaction = await SellingTransaction.findOne({ nftID, isActive: true })
-
-      if (user.id !== nft.ownerID) {
-         return resSendMsg(res, 200, 'You"re not the owner of this NFT!')
-      }
-      if (nft && !findTransaction) {
-         //Create transaction record
-         const transaction = await createSellingTransaction(next, user, nftID, price)
-         //Update status for sale of nft
-         return await sellNFT(res, next, nft, transaction)
-      } else if (findTransaction) {
-         return resSendMsg(res, 400, 'NFT is on sale already!')
+      if (nft) {
+         if (seller.id !== nft.ownerID) {
+            return resSendMsg(res, 200, "You're not the owner of this NFT!")
+         }
+         const findTransaction = await Transaction.findOne({
+            nftID,
+            'sellTransaction.isActive': true,
+         })
+         if (!findTransaction) {
+            //Create transaction record
+            const transaction = await createSellingTransaction(next, seller.id, nftID, sellPrice)
+            //Update status for sale of nft
+            return await sellNFT(res, next, nft, transaction, sellPrice)
+         } else {
+            return resSendMsg(res, 400, 'NFT is on sale already!')
+         }
       } else {
          return resSendMsg(res, 200, 'NFT not found!')
       }
@@ -59,30 +76,38 @@ export const sellNFTOnMarketplace = async (req: any, res: any, next: any) => {
    }
 }
 
-export const createBuyingTransaction = async (next: any, user: any, transacRef: any) => {
-   const createBuyerTransac = await new BuyingTransacion({
-      sellerTransactionReference: transacRef.id,
-      buyerID: user.id,
-      nftID: transacRef.nftID,
-      price: transacRef.price,
-      sellerID: transacRef.sellerID,
-      dateCreated: Date.now(),
-   })
-   const saveBuyerTransac = await createBuyerTransac.save()
-   if (saveBuyerTransac) return createBuyerTransac
+export const createBuyingTransaction = async (next: any, buyerID: any) => {
+   try {
+      const buyTransac = await new Transaction({
+         recipientID: buyerID,
+         transaction: 'Buy',
+         buyTransaction: {
+            isActive: true,
+            isPaymentDeducted: false,
+            isPaymentSent: false,
+            isNFTTransferred: false,
+         },
+      })
+      const saveBuyTransac = await buyTransac.save()
+      if (saveBuyTransac) return buyTransac
+   } catch (err) {
+      return next(err)
+   }
 }
 
 export const deductPaymentForBuying = async (
    next: any,
-   user: any,
-   price: any,
-   buyerTransaction: any
+   buyer: any,
+   sellPrice: Number,
+   buyerTransac: any
 ) => {
    try {
-      const updateBuyer = await user.updateOne({ $inc: { balance: -price } })
+      const updateBuyer = await buyer.updateOne({ $inc: { balance: -sellPrice } })
       if (updateBuyer) {
-         const updateTransac = await buyerTransaction.updateOne({ isPaymentDeducted: true })
-         if (updateTransac) return buyerTransaction
+         const updateBuyerTransac = await buyerTransac.updateOne({
+            'buyTransaction.isPaymentDeducted': true,
+         })
+         if (updateBuyerTransac) return buyerTransac
       }
    } catch (err) {
       return next(err)
@@ -91,20 +116,21 @@ export const deductPaymentForBuying = async (
 
 export const transferPaymentToSeller = async (
    next: any,
-   buyTransaction: any,
-   sellTransaction: any
+   seller: any,
+   price: any,
+   sellerTransac: any,
+   buyerTransac: any
 ) => {
    try {
-      const findSeller = await User.findByIdAndUpdate(
-         { _id: buyTransaction.sellerID },
-         { $inc: { balance: +buyTransaction.price } }
-      )
+      const findSeller = await seller.updateOne({ $inc: { balance: +price } })
       if (findSeller) {
-         const updateBuyerTransac = await buyTransaction.updateOne({ isPaymentSent: true })
-         const updateSellerTransac = await sellTransaction.updateOne({ isPaymentReceived: true })
-         if (updateBuyerTransac && updateSellerTransac) {
-            return buyTransaction
-         }
+         const updateSellerTransac = await sellerTransac.updateOne({
+            'sellTransaction.isPaymentReceived': true,
+         })
+         const updateBuyerTransac = await buyerTransac.updateOne({
+            'buyTransaction.isPaymentSent': true,
+         })
+         if (updateSellerTransac && updateBuyerTransac) return buyerTransac
       }
    } catch (err) {
       return next(err)
@@ -115,28 +141,29 @@ export const transferNFTToBuyer = async (
    res: any,
    next: any,
    nft: any,
-   user: any,
-   sellerTransacRecord: any,
-   buyerTransacRecord: any
+   buyerID: any,
+   sellerTransac: any,
+   buyerTransac: any
 ) => {
    try {
       const updateNFT = await nft.updateOne({
-         ownerID: user.id,
+         ownerID: buyerID,
          isForSale: false,
-         $unset: { datePostedOnMarketplace: '' },
+         $unset: { datePostedOnMarketplace: '', sellPrice: '' },
       })
       if (updateNFT) {
-         const updateSellerTransac = await sellerTransacRecord.updateOne({
-            isNFTTransferred: true,
+         const updateSellerTransac = await sellerTransac.updateOne({
             isCompleted: true,
-            isActive: false,
+            'sellTransaction.isNFTTransferred': true,
+            'sellTransaction.isActive': false,
          })
-         const updateBuyerTransac = await buyerTransacRecord.updateOne({
-            isNFTTransferred: true,
+         const updateBuyerTransac = await buyerTransac.updateOne({
             isCompleted: true,
+            'buyTransaction.isNFTTransferred': true,
+            'buyTransaction.isActive': false,
          })
          if (updateSellerTransac && updateBuyerTransac) {
-            return resSendMsg(res, 200, 'Successfully bought a NFT, check your storage.')
+            return resSendMsg(res, 200, 'Successsfully bought, check your inventory.')
          }
       }
    } catch (err) {
@@ -148,41 +175,55 @@ export const buyNFTOnMarketplace = async (req: any, res: any, next: any) => {
    try {
       const nftID = req.params.id
       const decodedJWT: any = await decodeJWT(req.cookies.jwt)
-      const nft = await NFT.findById({ _id: nftID })
-      const user = await User.findById({ _id: decodedJWT.id })
-      const transacRef = await SellingTransaction.findOne({ nftID, isActive: true })
-
-      if (!transacRef) {
-         return resSendMsg(res, 200, 'This NFT has been sold.')
-      }
-      if (user.balance < transacRef.price) {
-         return resSendMsg(res, 200, 'Not enough balance.')
-      }
-      if (user.id === transacRef.sellerID) {
-         return resSendMsg(res, 200, 'This is your item.')
-      }
-      if (transacRef && user && nft) {
-         //Create buy transaction if not on process or for sale
-         const buyerTransac = await createBuyingTransaction(next, decodedJWT, transacRef)
-         //Deduct payment of buyer
-         const payDeducTransaction = await deductPaymentForBuying(
-            next,
-            user,
-            transacRef.price,
-            buyerTransac
-         )
-         //Transfer payment to seller
-         const paySellerTransac = await transferPaymentToSeller(
-            next,
-            payDeducTransaction,
-            transacRef
-         )
-         //Tranfer NFT
-         if (paySellerTransac) {
-            return await transferNFTToBuyer(res, next, nft, user, transacRef, buyerTransac)
+      const sellerTransac = await Transaction.findOne({
+         nftID,
+         'sellTransaction.isActive': true,
+      })
+      if (sellerTransac) {
+         const { sellPrice, recipientID } = sellerTransac
+         const nft = await NFT.findById({ _id: nftID })
+         const buyer = await User.findById({ _id: decodedJWT.id })
+         const seller = await User.findById({ _id: recipientID })
+         if (buyer && seller) {
+            if (buyer.id === recipientID) {
+               return resSendMsg(res, 200, 'This is your item.')
+            }
+            if (buyer.balance < sellPrice) {
+               return resSendMsg(res, 200, 'Not enough balance.')
+            }
+         }
+         if (nft) {
+            //Create buy transaction if not on process or for sale
+            const buyerTransac = await createBuyingTransaction(next, buyer.id)
+            //Deduct payment of buyer
+            const updatedBuyerTransac = await deductPaymentForBuying(
+               next,
+               buyer,
+               sellPrice,
+               buyerTransac
+            )
+            //Transfer payment to seller
+            const finalBuyerTransac = await transferPaymentToSeller(
+               next,
+               seller,
+               sellPrice,
+               sellerTransac,
+               updatedBuyerTransac
+            )
+            //Tranfer NFT
+            return await transferNFTToBuyer(
+               res,
+               next,
+               nft,
+               buyer.id,
+               sellerTransac,
+               finalBuyerTransac
+            )
+         } else {
+            return resSendMsg(res, 200, 'No NFT found.')
          }
       } else {
-         return resSendMsg(res, 200, 'No NFT found.')
+         return resSendMsg(res, 200, 'This NFT has been sold or not currently on marketplace.')
       }
    } catch (err) {
       return next(err)
@@ -193,19 +234,27 @@ export const cancelSellOfNFT = async (req: any, res: any, next: any) => {
    try {
       const nftID = req.params.id
       const user: any = decodeJWT(req.cookies.jwt)
-      const transaction = await SellingTransaction.findOne({ nftID, isActive: true })
-
+      const transaction = await Transaction.findOne({
+         nftID,
+         'sellTransaction.isActive': true,
+      })
       if (transaction) {
-         if (transaction.sellerID !== user.id) {
+         const buyerTransac = await Transaction.findOne({ nftID, 'buyTransaction.isActive': true })
+         if (buyerTransac) {
+            return resSendMsg(res, 200, 'Buying in process can"t be unsell.')
+         }
+         if (transaction.recipientID !== user.id) {
             return resSendMsg(res, 200, 'You"re not the owner of this NFT.')
          }
-         const nft = await NFT.findById({ _id: nftID })
          //Update nft status not for sale
-         const unsellNFT: any = await nft.updateOne({
-            isForSale: false,
-            $unset: { datePostedOnMarketplace: '' },
-         })
-         if (unsellNFT) {
+         const updateNFT = await NFT.findByIdAndUpdate(
+            { _id: nftID },
+            {
+               isForSale: false,
+               $unset: { datePostedOnMarketplace: '', sellPrice: '' },
+            }
+         )
+         if (updateNFT) {
             const deleteTransaction = await transaction.remove()
             if (deleteTransaction) {
                return resSendMsg(res, 200, 'NFT successfully unsold.')

@@ -4,6 +4,8 @@ import { createJWTToken, decodeJWT, verifyToken } from '../service/jwt'
 import User from '../model/user'
 import bcryptjs from 'bcryptjs'
 import { transporer } from '../utilities/transporter'
+import { RequestHandler } from 'express'
+import Transaction from '../model/transaction'
 
 export const endUserSession = (res: any, req: any, msg: any) => {
    req.logout()
@@ -212,4 +214,37 @@ export const resetUserPassword = async (req: any, res: any) => {
         vrfiedToken.purpose === 'Password Reset'
       ? changeUserPassword(res, password, vrfiedToken)
       : resSendMsg(res, 400, 'Link expired. Try again.')
+}
+
+export const sendUserTransaction: RequestHandler = async (req, res, next) => {
+   try {
+      const user: any = decodeJWT(req.cookies.jwt)
+      const { sort, page, limit, transaction }: any = req.query
+      const queryObject: any = {
+         recipientID: user.id,
+      }
+      let defaultSort = '-createdAt'
+      if (sort) {
+         defaultSort = sort
+      }
+      let defaultPage = 1
+      let defaultLimit = 10
+      if (limit) {
+         defaultLimit = parseInt(limit)
+      }
+      if (page) {
+         defaultPage = parseInt(page)
+      }
+      if (transaction) {
+         queryObject.transaction = transaction
+      }
+      const transactions = await Transaction.find(queryObject)
+         .sort(defaultSort)
+         .limit(defaultLimit)
+         .skip((defaultPage - 1) * defaultLimit)
+      res.send(transactions)
+      res.end()
+   } catch (err) {
+      next(err)
+   }
 }

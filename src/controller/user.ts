@@ -1,4 +1,5 @@
 import * as srvc from '../service/user'
+import { asyncWrapper } from '../middleware/async'
 
 export const loginUser = async (req: any, res: any, next: any) => {
    try {
@@ -63,3 +64,7 @@ export const resetPassword = async (req: any, res: any) => {
       return await srvc.resSendServerErrorMsg(res, err)
    }
 }
+
+export const getUserTransaction = asyncWrapper(async (req: any, res: any, next: any) => {
+   return await srvc.sendUserTransaction(req, res, next)
+})
