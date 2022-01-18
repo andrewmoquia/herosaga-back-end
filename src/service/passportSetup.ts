@@ -58,7 +58,7 @@ export const authenticateJWTLogin = (req: any, res: any, next: any) => {
    //This is session less meaning to stored session in database
    passport.authenticate('jwt', { session: false }, (err, user, info) => {
       return err
-         ? next(err)
+         ? resSendMsg(res, 400, 'Invalid credentials.')
          : info
          ? resSendMsg(res, 400, 'Invalid credentials.')
          : user.isVerified

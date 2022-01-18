@@ -6,11 +6,22 @@ import bcryptjs from 'bcryptjs'
 import { transporer } from '../utilities/transporter'
 import { RequestHandler } from 'express'
 import Transaction from '../model/transaction'
+import { mintBoxData } from '../../src/utilities/mintBoxData'
+import { navMenuLogoData } from '../../src/utilities/navMenuLogoData'
+import { userNFTfilterData, marketFilterData } from '../../src/utilities/filtersData'
+import {
+   filterBrightness,
+   spriteBg,
+   heroesData,
+   starStyleOnRoulette,
+} from '../../src/utilities/heroesDataCSS'
 
 export const endUserSession = (res: any, req: any, msg: any) => {
    req.logout()
-   res.clearCookie('jwt')
-   res.status(200).send({ status: 200, message: msg })
+   res.clearCookie('jwt', { path: '/' }).send({
+      status: 200,
+      message: msg,
+   })
    return res.end()
 }
 
@@ -43,7 +54,19 @@ export const startUserSession = async (req: any, res: any) => {
       email: foundUser.email,
       balance: foundUser.balance,
    }
-   res.status(200).send({ status: 200, message: 'Successfully login!', user })
+   res.status(200).send({
+      status: 200,
+      message: 'Successfully login!',
+      user,
+      mintBoxData,
+      navMenuLogoData,
+      starStyleOnRoulette,
+      filterBrightness,
+      spriteBg,
+      heroesData,
+      userNFTfilterData,
+      marketFilterData,
+   })
    return res.end()
 }
 
@@ -52,8 +75,17 @@ export const reqLoginUser = async (req: any, res: any, payload: any, user: any) 
    await req.logIn(payload, { session: false }, (err: any) => {
       if (err) return resSendMsg(res, 500, err)
       if (user.isVerified) {
-         res.cookie('jwt', token, { httpOnly: true, sameSite: 'strict', secure: true })
+         res.cookie('jwt', token, {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+         })
          return resSendMsg(res, 200, 'Successfully login!')
+         // res.status(200).send({
+         //    message: 'Succesfully login.',
+         //    status: 200,
+         //    jwt: token,
+         // })
       }
       if (!user.isVerified) {
          res.status(200).send({
@@ -80,7 +112,7 @@ export const authenticateLogin = async (req: any, res: any, next: any) => {
             email: user.email,
             isVerified: user.isVerified,
             purpose: 'Login User',
-            expires: Date.now() + parseInt('1000000'),
+            expires: Date.now() + parseInt('100000000000'),
          }
          reqLoginUser(req, res, payload, user)
       }
@@ -191,7 +223,7 @@ export const sendResetLinkToEmail = async (req: any, res: any) => {
    }
 }
 
-export const changeUserPassword = (res: any, password: any, vrfiedToken: any) => {
+export const processResetUserPassword = (res: any, password: any, vrfiedToken: any) => {
    bcryptjs.genSalt(12, (err, salt) => {
       if (err) throw err
       bcryptjs.hash(password, salt, async (err, hash) => {
@@ -212,39 +244,130 @@ export const resetUserPassword = async (req: any, res: any) => {
       : password === confirmPassword &&
         vrfiedToken.expires > Date.now() &&
         vrfiedToken.purpose === 'Password Reset'
-      ? changeUserPassword(res, password, vrfiedToken)
+      ? processResetUserPassword(res, password, vrfiedToken)
       : resSendMsg(res, 400, 'Link expired. Try again.')
 }
 
 export const sendUserTransaction: RequestHandler = async (req, res, next) => {
    try {
       const user: any = decodeJWT(req.cookies.jwt)
-      const { sort, page, limit, transaction }: any = req.query
+      const { createdAt, isCompleted, page, transaction }: any = req.query
       const queryObject: any = {
          recipientID: user.id,
       }
-      let defaultSort = '-createdAt'
-      if (sort) {
-         defaultSort = sort
-      }
+      const resData: any = {}
+      const pageLimit = 9
       let defaultPage = 1
-      let defaultLimit = 10
-      if (limit) {
-         defaultLimit = parseInt(limit)
+      const defaultCreatedAt = -1
+      const defaultIsCompleted = -1
+      let createdAtSortOrder = -1
+      let isCompletedSortOrder = -1
+
+      if (createdAt) {
+         if (createdAt.charAt(0) != '-') {
+            createdAtSortOrder = 1
+         }
       }
-      if (page) {
-         defaultPage = parseInt(page)
+      if (isCompleted) {
+         if (isCompleted.charAt(0) != '-') {
+            isCompletedSortOrder = 1
+         }
       }
       if (transaction) {
          queryObject.transaction = transaction
       }
-      const transactions = await Transaction.find(queryObject)
-         .sort(defaultSort)
-         .limit(defaultLimit)
-         .skip((defaultPage - 1) * defaultLimit)
-      res.send(transactions)
-      res.end()
+      if (page) {
+         defaultPage = (page - 1) * pageLimit
+      }
+
+      console.time('Finding all transactions speed')
+      await Transaction.aggregate([
+         { $match: queryObject },
+         {
+            $sort: {
+               createdAt: createdAtSortOrder || defaultCreatedAt,
+               isCompleted: isCompletedSortOrder || defaultIsCompleted,
+            },
+         },
+         { $skip: defaultPage },
+         { $limit: pageLimit },
+      ])
+         .then((respond) => {
+            resData.transacsHits = respond.length
+            resData.transacs = respond
+            resData.page = page
+         })
+         .catch((err) => {
+            if (err) {
+               res.status(200).send({
+                  status: 500,
+                  message: 'Something went wrong! Please try again later.',
+               })
+               res.end()
+            }
+         })
+      console.timeEnd('Finding all transactions speed')
+
+      console.time('Counting all transactions speed')
+      await Transaction.aggregate([{ $match: queryObject }])
+         .count('recipientID')
+         .then((respond) => {
+            resData.transacsTotal = respond[0].recipientID
+            resData.totalPage = Math.ceil(resData.transacsTotal / pageLimit)
+         })
+         .catch((err) => {
+            if (err) {
+               res.status(200).send({
+                  status: 204,
+                  message: 'No transactions found.',
+               })
+               return res.end()
+            }
+         })
+      console.timeEnd('Counting all transactions speed')
+
+      res.status(200).send({ status: 200, payload: { ...resData } })
+      return res.end()
    } catch (err) {
       next(err)
+   }
+}
+
+export const changeUserPassword = async (req: any, res: any) => {
+   const { password, newPw, confirmNewPw } = req.body
+   const checkPwValidation = new RegExp(
+      '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,32}$'
+   )
+   //Check if new password is valid
+   if (!checkPwValidation.test(newPw)) {
+      return resSendMsg(res, 400, 'New password is weak.')
+   }
+   //Check if new password is match with confirm password
+   if (newPw !== confirmNewPw) {
+      return resSendMsg(res, 400, "Confirm password and old password don't match.")
+   }
+   //Proceed to change user password
+   const decodedJWT: any = decodeJWT(req.cookies.jwt)
+   const user = await User.findById(decodedJWT.id)
+   if (user) {
+      const matchPassword: any = await bcryptjs.compare(password, user.password)
+      if (matchPassword) {
+         bcryptjs.genSalt(12, (err, salt) => {
+            if (err) resSendMsg(res, 500, 'Something went wrong. Please try again later.')
+            bcryptjs.hash(newPw, salt, async (err, hash) => {
+               if (err) resSendMsg(res, 500, 'Something went wrong. Please try again later.')
+               const updateUser = await user.updateOne({
+                  password: hash,
+               })
+               return updateUser
+                  ? resSendMsg(res, 200, 'Successfully changed password.')
+                  : resSendMsg(res, 500, 'Something went wrong. Please try again later.')
+            })
+         })
+      } else {
+         resSendMsg(res, 400, 'Wrong old password.')
+      }
+   } else {
+      resSendMsg(res, 500, 'Something went wrong. Please try again later.')
    }
 }

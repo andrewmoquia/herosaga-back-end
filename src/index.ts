@@ -9,7 +9,7 @@ import passport from 'passport'
 import userRoutes from './routes/user'
 import csfrRoute from './routes/csrf'
 import nftRoutes from './routes/nft'
-import { limiter } from './utilities/limiter'
+// import { limiter } from './utilities/limiter'
 import { errorHandlerMiddleware } from './middleware/errorHandler'
 
 const app = express()
@@ -20,7 +20,9 @@ app.set('trust proxy', 1)
 //Site that allow to make request in API
 app.use(
    cors({
-      origin: 'http://localhost:3000',
+      // origin: 'http://localhost:3000',
+      origin: 'https://incumons.netlify.app',
+      methods: 'GET,HEAD,PUT,PATCH,POST',
       credentials: true,
    })
 )
@@ -36,7 +38,7 @@ app.use(cookieParser('secret'))
 app.use(helmet())
 
 //Apply the limiter
-app.use(limiter)
+// app.use(limiter)
 
 //Console request action in HTTP
 app.use(morgan('dev'))

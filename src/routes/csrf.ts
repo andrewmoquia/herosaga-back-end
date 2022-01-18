@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { csrfAuth } from '../service/csrf'
 import { createCSRFToken } from '../controller/csrf'
+import { csrfAuth } from '../service/csrf'
 
 const router = Router()
 

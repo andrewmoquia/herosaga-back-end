@@ -17,5 +17,8 @@ router.get('/buy/nft/:id', cntrl.buyNFT)
 //Show all nft in user's inventory
 router.get('/nft/get-all', cntrl.getAllNFT)
 router.get('/user/nft/get-all', cntrl.getAllUserNFT)
+router.get('/marketplace/nft/:id', cntrl.getMarketplaceNFT)
+router.get('/myNFT/nft/:id', cntrl.getUserNFT)
+router.get('/transactions/nft/:id', cntrl.getUserNFT)
 
 export default router

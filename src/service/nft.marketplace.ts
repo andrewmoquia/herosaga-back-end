@@ -76,10 +76,11 @@ export const sellNFTOnMarketplace = async (req: any, res: any, next: any) => {
    }
 }
 
-export const createBuyingTransaction = async (next: any, buyerID: any) => {
+export const createBuyingTransaction = async (next: any, buyerID: any, nftID: any) => {
    try {
       const buyTransac = await new Transaction({
          recipientID: buyerID,
+         nftID,
          transaction: 'Buy',
          buyTransaction: {
             isActive: true,
@@ -194,7 +195,7 @@ export const buyNFTOnMarketplace = async (req: any, res: any, next: any) => {
          }
          if (nft) {
             //Create buy transaction if not on process or for sale
-            const buyerTransac = await createBuyingTransaction(next, buyer.id)
+            const buyerTransac = await createBuyingTransaction(next, buyer.id, nft._id)
             //Deduct payment of buyer
             const updatedBuyerTransac = await deductPaymentForBuying(
                next,

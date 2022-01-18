@@ -5,6 +5,7 @@ import { decodeJWT } from './jwt'
 import { createNFTMintingTransaction, finalizeMintingNFTTransac } from './nft.minting'
 
 export const generateRandomNFTStats = (mintedRarity: string) => {
+   //TypeError: Cannot convert undefined or null to object
    //Get the attributes of minted rarity
    const rarityAttrib: any = nftAttributes[mintedRarity as keyof INFTAttributes]
    //Generate nft attributes with random stats value between min and max of attribute based on rarity
@@ -27,7 +28,7 @@ export const generateRandomNFTChar = (mintedRarity: string) => {
 
 export const generateRandomNFTRarity = (box: any) => {
    const randomNum = Math.floor(Math.random() * 100) + 1
-   if (box === 'silver') {
+   if (box === 'wooden') {
       return randomNum <= nftRarityChances.silver.common
          ? 'common'
          : randomNum > nftRarityChances.silver.common &&
@@ -36,7 +37,7 @@ export const generateRandomNFTRarity = (box: any) => {
          : randomNum > nftRarityChances.silver.uncommon && randomNum <= nftRarityChances.silver.rare
          ? 'rare'
          : 'epic'
-   } else if (box === 'gold') {
+   } else if (box === 'silver') {
       return randomNum <= nftRarityChances.gold.uncommon
          ? 'uncommon'
          : randomNum > nftRarityChances.gold.uncommon && randomNum <= nftRarityChances.gold.rare
@@ -89,6 +90,7 @@ export const registerMintedNFT = async (
 
 export const createNFT = async (req: any, res: any, next: any) => {
    try {
+      //TO-DO: check user balance before proceeding to minting
       //Create transaction record for every minting
       const transaction = await createNFTMintingTransaction(req, next)
       if (transaction) {

@@ -1,5 +1,5 @@
 import * as srvc from '../service/user'
-import { asyncWrapper } from '../middleware/async'
+import { resSendMsg } from '../service/user'
 
 export const loginUser = async (req: any, res: any, next: any) => {
    try {
@@ -65,6 +65,18 @@ export const resetPassword = async (req: any, res: any) => {
    }
 }
 
-export const getUserTransaction = asyncWrapper(async (req: any, res: any, next: any) => {
-   return await srvc.sendUserTransaction(req, res, next)
-})
+export const getUserTransaction = async (req: any, res: any, next: any) => {
+   try {
+      return srvc.sendUserTransaction(req, res, next)
+   } catch (err) {
+      return await srvc.resSendServerErrorMsg(res, err)
+   }
+}
+
+export const changePassword = async (req: any, res: any) => {
+   try {
+      return await srvc.changeUserPassword(req, res)
+   } catch (err) {
+      if (err) resSendMsg(res, 500, 'Something went wrong. Please try again later')
+   }
+}
