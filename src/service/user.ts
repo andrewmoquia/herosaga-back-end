@@ -6,15 +6,15 @@ import bcryptjs from 'bcryptjs'
 import { transporer } from '../utilities/transporter'
 import { RequestHandler } from 'express'
 import Transaction from '../model/transaction'
-import { mintBoxData } from '../../src/utilities/mintBoxData'
-import { navMenuLogoData } from '../../src/utilities/navMenuLogoData'
-import { userNFTfilterData, marketFilterData } from '../../src/utilities/filtersData'
+import { mintBoxData } from '../utilities/mintBoxData'
+import { navMenuLogoData } from '../utilities/navMenuLogoData'
+import { userNFTfilterData, marketFilterData } from '../utilities/filtersData'
 import {
    filterBrightness,
    spriteBg,
    heroesData,
    starStyleOnRoulette,
-} from '../../src/utilities/heroesDataCSS'
+} from '../utilities/heroesDataCSS'
 
 export const endUserSession = (res: any, req: any, msg: any) => {
    req.logout()
