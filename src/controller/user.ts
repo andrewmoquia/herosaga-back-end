@@ -9,9 +9,9 @@ export const loginUser = async (req: any, res: any, next: any) => {
    }
 }
 
-export const logoutUser = async (req: any, res: any) => {
+export const logoutUser = (req: any, res: any) => {
    try {
-      return await srvc.endUserSession(res, req, 'Successfully logout!')
+      return srvc.endUserSession(res, req, 'Successfully logout!')
    } catch (err) {
       if (err) return srvc.resSendServerErrorMsg(res, err)
    }

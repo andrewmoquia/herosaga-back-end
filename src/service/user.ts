@@ -17,7 +17,6 @@ import {
 } from '../utilities/heroesDataCSS'
 
 export const endUserSession = (res: any, req: any, msg: any) => {
-   req.logout()
    res.clearCookie('jwt').send({
       status: 200,
       message: msg,
