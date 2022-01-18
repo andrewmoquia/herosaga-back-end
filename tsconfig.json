@@ -21,7 +21,8 @@
 //       "isolatedModules": true,
 //       "noEmit": true,
 //       "strictNullChecks": true
-//    }
+//    },
+//    "include": ["src/**/*", "typings/**/*"]
 // }
 
 {
@@ -43,5 +44,6 @@
       "noImplicitThis": true,
       "noImplicitAny": true,
       "strictNullChecks": true
-   }
+   },
+   "include": ["src/**/*", "typings/**/*"]
 }
