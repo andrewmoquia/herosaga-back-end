@@ -26,9 +26,9 @@ passport.use(
                const passwordMatch = await bcryptjs.compare(password, user.password)
                return passwordMatch
                   ? done(null, user)
-                  : done(null, false, { status: 400, message: 'Invalid username or password!' })
+                  : done(null, false, { message: 'Invalid username or password!' })
             } else {
-               return done(null, false, { status: 400, message: 'Invalid username or password!' })
+               return done(null, false, { message: 'Invalid username or password!' })
             }
          } catch (err) {
             return done(err)
