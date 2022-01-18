@@ -21,7 +21,7 @@ export const searchNFTForSale: RequestHandler = async (req, res, next) => {
       let toBeSort = 'datePostedOnMarketplace'
       let defaultPage = 0
       const defaultLimit = 10
-      let sortOrder = -1
+      let sortOrder: any = -1
       const resData: any = {}
       const query: any = { isForSale: true, ownerID: { $ne: user.id } }
 
@@ -66,7 +66,6 @@ export const searchNFTForSale: RequestHandler = async (req, res, next) => {
             resData.page = page
          })
          .catch((err) => {
-            console.log('error trigger')
             if (err) {
                res.status(200).send({
                   status: 500,
@@ -74,6 +73,7 @@ export const searchNFTForSale: RequestHandler = async (req, res, next) => {
                })
                return res.end()
             }
+            return
          })
       console.timeEnd()
 
@@ -92,13 +92,14 @@ export const searchNFTForSale: RequestHandler = async (req, res, next) => {
                })
                return res.end()
             }
+            return
          })
       console.timeEnd()
 
       res.status(200).send({ status: 200, payload: { ...resData } })
       return res.end()
    } catch (err) {
-      if (err) next(err)
+      if (err) return next(err)
    }
 }
 
@@ -107,7 +108,7 @@ export const sendUsersNFT: RequestHandler = async (req, res, next) => {
       const { page, sort, rarity }: any = req.query
       const decodedJWT: any = decodeJWT(req.cookies.jwt)
       let toBeSort = 'dateMinted'
-      let sortOrder = -1
+      let sortOrder: any = -1
       let defaultPage = 0
       const resData: any = {}
       const query: any = {
@@ -155,6 +156,7 @@ export const sendUsersNFT: RequestHandler = async (req, res, next) => {
                })
                res.end()
             }
+            return
          })
       console.timeEnd()
 
@@ -173,13 +175,14 @@ export const sendUsersNFT: RequestHandler = async (req, res, next) => {
                })
                return res.end()
             }
+            return
          })
       console.timeEnd()
 
       res.status(200).send({ status: 200, payload: { ...resData } })
       return res.end()
    } catch (err) {
-      if (err) next(err)
+      if (err) return next(err)
    }
 }
 

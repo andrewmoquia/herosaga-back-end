@@ -260,8 +260,8 @@ export const sendUserTransaction: RequestHandler = async (req, res, next) => {
       let defaultPage = 1
       const defaultCreatedAt = -1
       const defaultIsCompleted = -1
-      let createdAtSortOrder = -1
-      let isCompletedSortOrder = -1
+      let createdAtSortOrder: any = -1
+      let isCompletedSortOrder: any = -1
 
       if (createdAt) {
          if (createdAt.charAt(0) != '-') {
@@ -323,13 +323,14 @@ export const sendUserTransaction: RequestHandler = async (req, res, next) => {
                })
                return res.end()
             }
+            return
          })
       console.timeEnd('Counting all transactions speed')
 
       res.status(200).send({ status: 200, payload: { ...resData } })
       return res.end()
    } catch (err) {
-      next(err)
+      return next(err)
    }
 }
 
