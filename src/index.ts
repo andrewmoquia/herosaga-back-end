@@ -56,6 +56,6 @@ app.use(nftRoutes)
 app.use(errorHandlerMiddleware)
 
 //Live our server
-app.listen(config.PORT, () => {
+app.listen(config.PORT || 5000, () => {
    console.log('Server is up!')
 })
