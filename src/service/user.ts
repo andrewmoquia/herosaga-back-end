@@ -18,7 +18,7 @@ import {
 
 export const endUserSession = (res: any, req: any, msg: any) => {
    req.logout()
-   res.clearCookie('jwt', { path: '/' }).send({
+   res.clearCookie('jwt').send({
       status: 200,
       message: msg,
    })
