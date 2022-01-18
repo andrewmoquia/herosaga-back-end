@@ -17,7 +17,14 @@ import {
 } from '../utilities/heroesDataCSS'
 
 export const endUserSession = (res: any, req: any, msg: any) => {
-   res.clearCookie('jwt', { path: '/', domain: 'incumons.herokuapp.com' }).send({
+   res.cookie('jwt', '', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      path: '/',
+      domain: 'incumons.herokuapp.com',
+   })
+   res.send({
       status: 200,
       message: msg,
    })
