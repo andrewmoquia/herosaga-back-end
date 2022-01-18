@@ -44,6 +44,5 @@
       "noImplicitThis": true,
       "noImplicitAny": true,
       "strictNullChecks": true
-   },
-   "include": ["src/**/*", "typings/**/*"]
+   }
 }
