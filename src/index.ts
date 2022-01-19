@@ -22,7 +22,6 @@ app.use(
    cors({
       // origin: 'http://localhost:3000',
       origin: 'https://incumons.netlify.app',
-      methods: 'GET,HEAD,PUT,PATCH,POST',
       credentials: true,
    })
 )

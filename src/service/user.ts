@@ -204,7 +204,7 @@ export const updateVerifyStatOfUser = async (res: any, token: any) => {
 
 export const createResetPwLink = async (res: any, payload: any, userEmail: any) => {
    const emailToken = createJWTToken(payload)
-   const url = `http://localhost:3000/reset/password/${emailToken}`
+   const url = `https://incumons.netlify.app/reset/password/${emailToken}`
    const msg = {
       1: 'Please click this to reset your password',
       2: 'Forgot password request sent! Check your email inbox or spam folder.',
