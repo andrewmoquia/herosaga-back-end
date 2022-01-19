@@ -174,20 +174,24 @@ export const sendURLToEmail = async (res: any, verificationURL: any, msg: any, u
 }
 
 export const createUrlVerifToken = async (req: any, res: any) => {
-   const decodedJwt: any = await decodeJWT(req.cookies.jwt)
-   const payload = {
-      email: `${decodedJwt.email}`,
-      purpose: 'Account Verification',
-      expires: Date.now() + parseInt('1000000'),
+   try {
+      const decodedJwt: any = await decodeJWT(req.cookies.jwt)
+      const payload = {
+         email: `${decodedJwt.email}`,
+         purpose: 'Account Verification',
+         expires: Date.now() + parseInt('1000000'),
+      }
+      const emailToken = createJWTToken(payload)
+      const url = `https://incumons.netlify.app/verify/account/${emailToken}`
+      const msg = {
+         1: 'Please click this to confirm your email',
+         2: 'Verification sent! Check your email inbox or spam folder.',
+         3: 'Verify your account.',
+      }
+      return await sendURLToEmail(res, url, msg, decodedJwt.email)
+   } catch (err) {
+      resSendMsg(res, 200, 'Invalid request.')
    }
-   const emailToken = createJWTToken(payload)
-   const url = `http://localhost:3000/verify/account/${emailToken}`
-   const msg = {
-      1: 'Please click this to confirm your email',
-      2: 'Verification sent! Check your email inbox or spam folder.',
-      3: 'Verify your account.',
-   }
-   return await sendURLToEmail(res, url, msg, decodedJwt.email)
 }
 
 export const updateVerifyStatOfUser = async (res: any, token: any) => {
@@ -373,5 +377,19 @@ export const changeUserPassword = async (req: any, res: any) => {
       }
    } else {
       resSendMsg(res, 500, 'Something went wrong. Please try again later.')
+   }
+}
+
+export const checkUserBalance = async (req: any, res: any) => {
+   try {
+      const decodedJWT: any = await decodeJWT(req.cookies.jwt)
+      const user = await findUserByID(res, decodedJWT.id)
+      res.status(200).send({
+         status: 200,
+         balance: user.balance,
+      })
+      return res.end()
+   } catch (err) {
+      if (err) return resSendMsg(res, 500, 'Something went wrong. Please try again later.')
    }
 }
