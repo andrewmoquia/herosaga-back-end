@@ -89,11 +89,6 @@ export const reqLoginUser = async (req: any, res: any, payload: any, user: any) 
             domain: 'incumons.herokuapp.com',
          })
          return resSendMsg(res, 200, 'Successfully login!')
-         // res.status(200).send({
-         //    message: 'Succesfully login.',
-         //    status: 200,
-         //    jwt: token,
-         // })
       }
       if (!user.isVerified) {
          res.status(200).send({
