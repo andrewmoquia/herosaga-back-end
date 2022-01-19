@@ -80,3 +80,11 @@ export const changePassword = async (req: any, res: any) => {
       if (err) return resSendMsg(res, 500, 'Something went wrong. Please try again later')
    }
 }
+
+export const getUserBalance = async (req: any, res: any) => {
+   try {
+      return await srvc.checkUserBalance(req, res)
+   } catch (err) {
+      if (err) return resSendMsg(res, 500, 'Something went wrong. Please try again later')
+   }
+}

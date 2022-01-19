@@ -45,9 +45,22 @@ export const transferPaymentForMintingBox = async (transaction: any, next: any) 
    }
 }
 
-export const deductBalanceForMintingBox = async (user: any, transaction: any, next: any) => {
+export const deductBalanceForMintingBox = async (
+   user: any,
+   transaction: any,
+   next: any,
+   box: any
+) => {
    try {
-      const updateUser = await user.updateOne({ $inc: { balance: -10 } })
+      let balanceToDeduct = -10
+      if (box === 'wooden') {
+         balanceToDeduct = -10
+      } else if (box === 'silver') {
+         balanceToDeduct = -20
+      } else {
+         balanceToDeduct = -30
+      }
+      const updateUser = await user.updateOne({ $inc: { balance: balanceToDeduct } })
       if (updateUser) {
          const updateTransaction = await transaction.updateOne({
             'mintTransaction.isPaymentSent': true,
@@ -80,12 +93,13 @@ export const createTransaction = async (user: any, next: any) => {
 
 export const createNFTMintingTransaction = async (req: any, next: any) => {
    try {
+      const { box } = req.params
       const decodedJWT: any = decodeJWT(req.cookies.jwt)
       const user = await User.findById({ _id: decodedJWT.id })
       //Create transaction record in database
       const transaction = await createTransaction(user, next)
       //Deduct balance from buyer
-      const nextTransaction = await deductBalanceForMintingBox(user, transaction, next)
+      const nextTransaction = await deductBalanceForMintingBox(user, transaction, next, box)
       //Transfer payment to the system
       const updatedTransaction = await transferPaymentForMintingBox(nextTransaction, next)
       return updatedTransaction

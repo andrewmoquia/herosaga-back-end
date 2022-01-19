@@ -24,5 +24,6 @@ router.put('/reset/password/:token', cntrl.resetPassword)
 router.put('/change/password', cntrl.changePassword)
 
 router.get('/user/transactions/get-all', cntrl.getUserTransaction)
+router.get('/user/balance', authenticateJWTLogin, cntrl.getUserBalance)
 
 export default router
