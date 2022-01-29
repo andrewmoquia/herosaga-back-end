@@ -16,6 +16,28 @@ import {
    starStyleOnRoulette,
 } from '../utilities/heroesDataCSS'
 
+export const saveCookieForVerification = async (res: any, req: any, user: any) => {
+   const payload = {
+      email: user.email,
+      purpose: 'Request for user verification',
+      expires: Date.now() + parseInt('100000000000'),
+   }
+   const token = createJWTToken(payload)
+   await req.logIn(payload, { session: false }, (err: any) => {
+      if (err) return resSendMsg(res, 500, err)
+      if (!user.isVerified) {
+         res.cookie('jwt', token, {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+            path: '/',
+            domain: 'incumons.herokuapp.com',
+         })
+         return resSendMsg(res, 200, 'Successfully sent request token!')
+      }
+   })
+}
+
 export const endUserSession = (res: any, req: any, msg: any) => {
    res.cookie('jwt', '', {
       httpOnly: true,

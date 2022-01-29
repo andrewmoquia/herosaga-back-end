@@ -4,7 +4,7 @@ import passportLocal from 'passport-local'
 import passport from 'passport'
 import passportJWT from 'passport-jwt'
 import { config } from '../utilities/config'
-import { resSendMsg, endUserSession } from './user'
+import { resSendMsg, saveCookieForVerification } from './user'
 const LocalStrategy = passportLocal.Strategy
 const JWTStrategy = passportJWT.Strategy
 
@@ -64,7 +64,7 @@ export const authenticateJWTLogin = (req: any, res: any, next: any) => {
          : user.isVerified
          ? next()
          : !user.isVerified
-         ? endUserSession(req, res, 'User is not verified.')
+         ? saveCookieForVerification(req, res, user)
          : resSendMsg(res, 500, 'Something went wrong. Try again later.')
    })(req, res, next)
 }
