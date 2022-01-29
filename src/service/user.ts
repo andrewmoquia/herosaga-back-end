@@ -31,7 +31,7 @@ export const saveCookieForVerification = async (req: any, res: any, user: any) =
             sameSite: 'none',
             secure: true,
             path: '/',
-            domain: 'incumons.neflify.app',
+            domain: 'incumons.heroku.com',
          })
          return resSendMsg(res, 401, 'Successfully sent request token!')
       }
@@ -44,7 +44,7 @@ export const endUserSession = (res: any, req: any, msg: any) => {
       sameSite: 'none',
       secure: true,
       path: '/',
-      domain: 'incumons.neflify.app',
+      domain: 'incumons.heroku.com',
    })
    res.send({
       status: 200,
@@ -108,7 +108,7 @@ export const reqLoginUser = async (req: any, res: any, payload: any, user: any) 
             sameSite: 'none',
             secure: true,
             path: '/',
-            domain: 'incumons.neflify.app',
+            domain: 'incumons.heroku.com',
          })
          return resSendMsg(res, 200, 'Successfully login!')
       }
