@@ -193,7 +193,7 @@ export const createUrlVerifToken = async (req: any, res: any) => {
          expires: Date.now() + parseInt('1000000'),
       }
       const emailToken = createJWTToken(payload)
-      const url = `https://incumons.netlify.app/verify/account/${emailToken}`
+      const url = `https://incumons.netlify.app/verify/account?second-step=${emailToken}`
       const msg = {
          1: 'Please click this to confirm your email',
          2: 'Verification sent! Check your email inbox or spam folder.',
@@ -219,7 +219,7 @@ export const updateVerifyStatOfUser = async (res: any, token: any) => {
 
 export const createResetPwLink = async (res: any, payload: any, userEmail: any) => {
    const emailToken = createJWTToken(payload)
-   const url = `https://incumons.netlify.app/verify/account?second-step=${emailToken}`
+   const url = `https://incumons.netlify.app/reset/password/${emailToken}`
    const msg = {
       1: 'Please click this to reset your password',
       2: 'Forgot password request sent! Check your email inbox or spam folder.',
