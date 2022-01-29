@@ -18,8 +18,11 @@ import {
 
 export const saveCookieForVerification = async (req: any, res: any, user: any) => {
    const payload = {
+      id: user._id,
+      username: user.username,
       email: user.email,
-      purpose: 'Request for user verification',
+      isVerified: user.isVerified,
+      purpose: 'Verify User',
       expires: Date.now() + parseInt('100000000000'),
    }
    const token = createJWTToken(payload)
