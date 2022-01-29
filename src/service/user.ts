@@ -16,7 +16,7 @@ import {
    starStyleOnRoulette,
 } from '../utilities/heroesDataCSS'
 
-export const saveCookieForVerification = async (res: any, req: any, user: any) => {
+export const saveCookieForVerification = async (req: any, res: any, user: any) => {
    const payload = {
       email: user.email,
       purpose: 'Request for user verification',
@@ -31,9 +31,9 @@ export const saveCookieForVerification = async (res: any, req: any, user: any) =
             sameSite: 'none',
             secure: true,
             path: '/',
-            domain: 'incumons.herokuapp.com',
+            domain: 'localhost',
          })
-         return resSendMsg(res, 200, 'Successfully sent request token!')
+         return resSendMsg(res, 401, 'Successfully sent request token!')
       }
    })
 }
@@ -44,7 +44,7 @@ export const endUserSession = (res: any, req: any, msg: any) => {
       sameSite: 'none',
       secure: true,
       path: '/',
-      domain: 'incumons.herokuapp.com',
+      domain: 'localhost',
    })
    res.send({
       status: 200,
@@ -108,17 +108,12 @@ export const reqLoginUser = async (req: any, res: any, payload: any, user: any) 
             sameSite: 'none',
             secure: true,
             path: '/',
-            domain: 'incumons.herokuapp.com',
+            domain: 'localhost',
          })
          return resSendMsg(res, 200, 'Successfully login!')
       }
       if (!user.isVerified) {
-         res.status(200).send({
-            status: 401,
-            message: 'You need to verify your account first!',
-            jwt: `${token}`,
-         })
-         return res.end()
+         saveCookieForVerification(req, res, user)
       }
    })
 }
