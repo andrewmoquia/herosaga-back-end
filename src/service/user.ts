@@ -179,9 +179,10 @@ export const findAndRegisterUser = async (res: any, data: any) => {
 
 export const sendURLToEmail = async (res: any, verificationURL: any, msg: any, userEmail: any) => {
    const sendEmail = await transporer.sendMail({
-      from: 'heartweb09@gmail.com',
+      from: 'heartweb <heartweb09@gmail.com>',
       to: `${userEmail}`,
       subject: `${msg[3]}`,
+      text: 'Text',
       html: `${msg[1]}: <a href="${verificationURL}">${verificationURL}</a>`,
    })
    return sendEmail ? resSendMsg(res, 200, msg[2]) : resSendMsg(res, 500, 'Something went wrong!')
