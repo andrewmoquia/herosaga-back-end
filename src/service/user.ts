@@ -179,7 +179,7 @@ export const findAndRegisterUser = async (res: any, data: any) => {
 
 export const sendURLToEmail = async (res: any, verificationURL: any, msg: any, userEmail: any) => {
    const sendEmail = await transporer.sendMail({
-      from: 'no-reply@gmail.com',
+      from: 'heartweb09@gmail.com',
       to: `${userEmail}`,
       subject: `${msg[3]}`,
       text: 'Text',

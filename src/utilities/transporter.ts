@@ -10,5 +10,5 @@ export const transporer = nodeMailer.createTransport({
       user: 'heartweb09@gmail.com',
       pass: 'heartweb123',
    },
-   from: 'no-reply@gmail.com',
+   from: 'heartweb09@gmail.com',
 })
