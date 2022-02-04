@@ -169,9 +169,14 @@ export const findUserRegistration = async (res: any, data: any) => {
 }
 
 export const findAndRegisterUser = async (res: any, data: any) => {
+   const validatePasswordRegex = new RegExp(
+      '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,32}$'
+   )
    const { email, username, password, confirmPassword } = data
    return !email || !username || !password || !confirmPassword
       ? resSendMsg(res, 400, 'All fields required')
+      : !validatePasswordRegex.test(password)
+      ? resSendMsg(res, 400, 'Weak password.')
       : password != confirmPassword
       ? resSendMsg(res, 400, "Password don't match.")
       : await findUserRegistration(res, data)
