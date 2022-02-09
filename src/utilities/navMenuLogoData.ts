@@ -6,7 +6,7 @@ export const navMenuLogoData = {
             route: 'mysteryshop',
             label: 'Mystery Shop',
          },
-         img: 'https://i.ibb.co/yhR3DvY/UI-Graphic-Resource-Gems.webp',
+         img: 'https://herosaga.netlify.app/images/misc/UI-Graphic-Resource-Gems.webp',
          alt: 'Spell-Book-Preface-14',
       },
       {
@@ -15,7 +15,7 @@ export const navMenuLogoData = {
             route: 'marketplace/query',
             label: 'Marketplace',
          },
-         img: 'https://i.ibb.co/0BBYj5M/UI-Graphic-Resource-Coins.webp',
+         img: 'https://herosaga.netlify.app/images/misc/UI-Graphic-Resource-Coins.webp',
          alt: 'UI-Graphic-Resource-Wood',
       },
       {
@@ -24,7 +24,7 @@ export const navMenuLogoData = {
             route: 'myNFT/query',
             label: 'My NFT',
          },
-         img: 'https://i.ibb.co/M1cW63T/UI-Graphic-Resource-Iron.webp',
+         img: 'https://herosaga.netlify.app/images/misc/UI-Graphic-Resource-Iron.webp',
          alt: 'UI-Graphic-Resource-Iron',
       },
       {
@@ -33,7 +33,7 @@ export const navMenuLogoData = {
             route: 'transactions/query',
             label: 'Transactions',
          },
-         img: 'https://i.ibb.co/Kw2hRK0/Reload-1.webp',
+         img: 'https://herosaga.netlify.app/images/misc/Reload-1.webp',
          alt: 'Transaction logo.',
       },
    ],
@@ -44,7 +44,7 @@ export const navMenuLogoData = {
             route: 'profile',
             label: 'Profile',
          },
-         img: 'https://i.ibb.co/Tbk7VdD/Menu.webp',
+         img: 'https://herosaga.netlify.app/images/misc/Menu.webp',
          alt: 'Profile logo.',
       },
       {
@@ -53,7 +53,7 @@ export const navMenuLogoData = {
             route: 'logout',
             label: 'Logout',
          },
-         img: 'https://i.ibb.co/qWJNfZt/Pause-1.webp',
+         img: 'https://herosaga.netlify.app/images/misc/Pause-1.webp',
          alt: 'Logout logo.',
       },
    ],

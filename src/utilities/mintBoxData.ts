@@ -1,8 +1,8 @@
 export const mintBoxData = [
    {
       type: ['Wooden Box', 'wooden'],
-      image: 'https://i.ibb.co/6vqHFts/wooden-box.webp',
-      tile: 'https://i.ibb.co/qj02k2x/glass-tile.webp',
+      image: 'https://herosaga.netlify.app/images/misc/wooden-box.webp',
+      tile: 'https://herosaga.netlify.app/images/misc/glass-tile.webp',
       price: 10,
       chances: [
          {
@@ -25,8 +25,8 @@ export const mintBoxData = [
    },
    {
       type: ['Silver Box', 'silver'],
-      image: 'https://i.ibb.co/txKzK3s/silver-box2.webp',
-      tile: 'https://i.ibb.co/qj02k2x/glass-tile.webp',
+      image: 'https://herosaga.netlify.app/images/misc/silver-box2.webp',
+      tile: 'https://herosaga.netlify.app/images/misc/glass-tile.webp',
       price: 20,
       chances: [
          {
@@ -49,8 +49,8 @@ export const mintBoxData = [
    },
    {
       type: ['Golden Box', 'golden'],
-      image: 'https://i.ibb.co/k2JhCcV/gold-box2.webp',
-      tile: 'https://i.ibb.co/qj02k2x/glass-tile.webp',
+      image: 'https://herosaga.netlify.app/images/misc/gold-box2.webp',
+      tile: 'https://herosaga.netlify.app/images/misc/glass-tile.webp',
       price: 30,
       chances: [
          {
