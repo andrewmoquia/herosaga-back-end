@@ -170,7 +170,7 @@ export const findUserRegistration = async (res: any, data: any) => {
 
 export const findAndRegisterUser = async (res: any, data: any) => {
    const validatePasswordRegex = new RegExp(
-      '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,32}$'
+      '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,32}$'
    )
    const { email, username, password, confirmPassword } = data
    return !email || !username || !password || !confirmPassword
