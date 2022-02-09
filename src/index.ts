@@ -21,7 +21,7 @@ app.set('trust proxy', 1)
 app.use(
    cors({
       // origin: 'http://localhost:3000',
-      origin: 'https://incumon.netlify.app',
+      origin: 'https://herosaga.netlify.app',
       credentials: true,
    })
 )
