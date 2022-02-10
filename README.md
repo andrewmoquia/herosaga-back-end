@@ -7,7 +7,6 @@ A mockup NFT Marketplace where user can mint, buy, and sell generated virtual it
 * [Installation](#installation)
 * [Run Locally](#run_local)
 * [Deployment](#deployment)
-* [Screenshots](#screenshots)
 
 ## Features
 These are the basic functionalities/feature of the web app
