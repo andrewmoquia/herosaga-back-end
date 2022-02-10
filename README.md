@@ -32,7 +32,7 @@ $ npm i
 
 ## Run locally
 Before running the app in your local server, make sure you set up your mongodb uri.
-Create ```.env-dev``` or ```.end-prod``` env variables and set the following:
+Create ```.env``` env variables and set the following:
 MONGODB_URI="your mongodb uri"
 
 After you setup the mongodb now start your app.
