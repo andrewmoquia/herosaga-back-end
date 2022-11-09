@@ -26,4 +26,9 @@ router.put('/change/password', cntrl.changePassword)
 router.get('/user/transactions/get-all', cntrl.getUserTransaction)
 router.get('/user/balance', authenticateJWTLogin, cntrl.getUserBalance)
 
+router.post('/user/test/checkPayload', (req, res) => {
+   console.log(req.body)
+   res.send(req.body)
+})
+
 export default router
